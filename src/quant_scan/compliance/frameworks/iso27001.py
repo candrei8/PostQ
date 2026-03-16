@@ -23,7 +23,10 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
             ComplianceRef(
                 framework="ISO 27001",
                 requirement_id="A.8.24",
-                description="Use of cryptography — algorithm is quantum-vulnerable; documented cryptographic policy required",
+                description=(
+                    "Use of cryptography — algorithm is quantum-vulnerable; "
+                    "documented cryptographic policy required"
+                ),
                 status="action_required",
             )
         )

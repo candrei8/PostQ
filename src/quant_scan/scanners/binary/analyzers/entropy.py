@@ -1,4 +1,5 @@
 """Entropy analysis — detects high-entropy regions that may contain embedded keys."""
+
 from __future__ import annotations
 
 import math
@@ -33,7 +34,7 @@ def analyze_entropy(file_path: str, data: bytes) -> list[Finding]:
     high_entropy_regions: list[tuple[int, float]] = []
 
     for offset in range(0, len(data) - _BLOCK_SIZE, _BLOCK_SIZE):
-        block = data[offset:offset + _BLOCK_SIZE]
+        block = data[offset : offset + _BLOCK_SIZE]
         entropy = _shannon_entropy(block)
 
         if entropy >= _ENTROPY_THRESHOLD:
@@ -46,23 +47,33 @@ def analyze_entropy(file_path: str, data: bytes) -> list[Finding]:
         return findings  # Likely a compressed file, not interesting
 
     for offset, entropy in high_entropy_regions[:_MAX_FINDINGS]:
-        findings.append(Finding(
-            rule_id="BIN-ENTROPY-HIGH",
-            severity=Severity.INFO,
-            quantum_risk=QuantumRisk.UNKNOWN,
-            algorithm=Algorithm(
-                name="Unknown-HighEntropy",
-                family=AlgorithmFamily.UNKNOWN,
+        findings.append(
+            Finding(
+                rule_id="BIN-ENTROPY-HIGH",
+                severity=Severity.INFO,
                 quantum_risk=QuantumRisk.UNKNOWN,
-                description=f"High-entropy region (entropy: {entropy:.2f} bits/byte)",
-            ),
-            location=FileLocation(
-                file_path=file_path,
-                line_number=offset,
-                line_content=f"offset 0x{offset:x}: entropy={entropy:.2f} bits/byte",
-            ),
-            message=f"High-entropy region detected at offset 0x{offset:x} (entropy: {entropy:.2f}/8.0) — may contain embedded cryptographic key material",
-            recommendation="Review binary for embedded keys or certificates. Use proper key management instead of embedding keys in binaries",
-        ))
+                algorithm=Algorithm(
+                    name="Unknown-HighEntropy",
+                    family=AlgorithmFamily.UNKNOWN,
+                    quantum_risk=QuantumRisk.UNKNOWN,
+                    description=f"High-entropy region (entropy: {entropy:.2f} bits/byte)",
+                ),
+                location=FileLocation(
+                    file_path=file_path,
+                    line_number=offset,
+                    line_content=f"offset 0x{offset:x}: entropy={entropy:.2f} bits/byte",
+                ),
+                message=(
+                    f"High-entropy region detected at offset 0x{offset:x} "
+                    f"(entropy: {entropy:.2f}/8.0) — may contain embedded "
+                    "cryptographic key material"
+                ),
+                recommendation=(
+                    "Review binary for embedded keys or certificates. "
+                    "Use proper key management instead of embedding "
+                    "keys in binaries"
+                ),
+            )
+        )
 
     return findings

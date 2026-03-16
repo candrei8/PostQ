@@ -1,8 +1,9 @@
 """Tests for CI/CD integration (quality gate, PR comments, SARIF)."""
+
 from __future__ import annotations
 
-from quant_scan.cicd.quality_gate import QualityGate
 from quant_scan.cicd.pr_comment import format_pr_comment
+from quant_scan.cicd.quality_gate import QualityGate
 from quant_scan.core.models import ScanResult, ScanSummary
 
 
@@ -30,7 +31,11 @@ def test_quality_gate_fails_critical():
 
 
 def test_pr_comment_format():
-    result = ScanResult(summary=ScanSummary(score=75.0, grade="B", total_findings=5, files_scanned=10, by_severity={"high": 3, "medium": 2}))
+    result = ScanResult(
+        summary=ScanSummary(
+            score=75.0, grade="B", total_findings=5, files_scanned=10, by_severity={"high": 3, "medium": 2}
+        )
+    )
     comment = format_pr_comment(result)
     assert "## Quant-Scan" in comment
     assert "75" in comment
@@ -38,13 +43,16 @@ def test_pr_comment_format():
 
 
 def test_sarif_format():
-    from quant_scan.reports.formats.sarif_report import render_sarif
-    from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
-    from quant_scan.core.models import Algorithm, FileLocation, Finding
     import json
 
+    from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
+    from quant_scan.core.models import Algorithm, FileLocation, Finding
+    from quant_scan.reports.formats.sarif_report import render_sarif
+
     finding = Finding(
-        rule_id="TEST-RSA", severity=Severity.HIGH, quantum_risk=QuantumRisk.VULNERABLE,
+        rule_id="TEST-RSA",
+        severity=Severity.HIGH,
+        quantum_risk=QuantumRisk.VULNERABLE,
         algorithm=Algorithm(name="RSA", family=AlgorithmFamily.RSA, quantum_risk=QuantumRisk.VULNERABLE),
         location=FileLocation(file_path="test.py", line_number=10, line_content="rsa.generate()"),
         message="RSA detected",

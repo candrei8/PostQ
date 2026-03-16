@@ -1,4 +1,5 @@
 """Network scanner — probes live endpoints for crypto vulnerabilities."""
+
 from __future__ import annotations
 
 import logging

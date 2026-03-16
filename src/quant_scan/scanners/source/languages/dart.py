@@ -1,4 +1,5 @@
 """Dart language analyzer — loads rules from dart.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

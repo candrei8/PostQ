@@ -6,7 +6,7 @@ Maps findings to HIPAA technical safeguards for encryption.
 from __future__ import annotations
 
 from quant_scan.compliance.mapper import ComplianceRef
-from quant_scan.core.enums import AlgorithmFamily, QuantumRisk
+from quant_scan.core.enums import AlgorithmFamily
 from quant_scan.core.models import Finding
 
 
@@ -14,7 +14,6 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
     """Return HIPAA compliance references applicable to *finding*."""
     refs: list[ComplianceRef] = []
     family = finding.algorithm.family
-    q_risk = finding.quantum_risk
 
     # 164.312(a)(2)(iv) — Encryption and decryption (data at rest)
     if family in (
@@ -26,7 +25,10 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
             ComplianceRef(
                 framework="HIPAA",
                 requirement_id="164.312(a)(2)(iv)",
-                description=f"Encryption and decryption — {family.value} does not meet encryption standard requirements",
+                description=(
+                    f"Encryption and decryption — {family.value} "
+                    "does not meet encryption standard requirements"
+                ),
                 status="non_compliant",
             )
         )

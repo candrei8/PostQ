@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from quant_scan.core.enums import QuantumRisk, Severity
-from quant_scan.core.models import Algorithm, FileLocation, Finding
+from quant_scan.core.models import FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 
 # ---------------------------------------------------------------------------
@@ -117,16 +117,13 @@ def analyze_go_deps(file_path: str, content: str) -> list[Finding]:
         for lib_info in _GO_CRYPTO_LIBS:
             # Use startswith to handle versioned paths like
             # github.com/golang-jwt/jwt/v5
-            if mod_path.startswith(lib_info["module"]) or \
-               mod_path == lib_info["module"]:
+            if mod_path.startswith(lib_info["module"]) or mod_path == lib_info["module"]:
                 algo_key = lib_info["algorithm_key"]
                 algo = algorithms.get(algo_key)
                 if algo is None:
                     continue
 
-                line_content = (
-                    lines[line_no - 1] if line_no <= len(lines) else ""
-                )
+                line_content = lines[line_no - 1] if line_no <= len(lines) else ""
 
                 findings.append(
                     Finding(

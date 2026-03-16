@@ -1,7 +1,5 @@
 """Tests for the scan engine."""
 
-from pathlib import Path
-
 from quant_scan.core.context import ScanContext
 from quant_scan.core.engine import ScanEngine
 from quant_scan.core.enums import Severity

@@ -1,4 +1,5 @@
 """Swift language analyzer — loads rules from swift.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

@@ -2,6 +2,7 @@
 
 Maps findings to eIDAS electronic signature and trust service requirements.
 """
+
 from __future__ import annotations
 
 from quant_scan.compliance.mapper import ComplianceRef
@@ -31,7 +32,10 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
             ComplianceRef(
                 framework="eIDAS 2.0",
                 requirement_id="Art 32",
-                description="Qualified electronic signatures using quantum-vulnerable algorithms require migration plan",
+                description=(
+                    "Qualified electronic signatures using "
+                    "quantum-vulnerable algorithms require migration plan"
+                ),
                 status="action_required",
                 deadline="2027-12-31",
             )

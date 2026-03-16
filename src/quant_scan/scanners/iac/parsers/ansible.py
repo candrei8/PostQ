@@ -1,4 +1,5 @@
 """Ansible parser — detects crypto configurations in Ansible playbooks."""
+
 from __future__ import annotations
 
 import re

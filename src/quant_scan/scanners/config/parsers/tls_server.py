@@ -49,30 +49,18 @@ _WEAK_CIPHER_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
 # ---------------------------------------------------------------------------
 
 # Nginx: ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-_RE_NGINX_PROTOCOLS = re.compile(
-    r"^\s*ssl_protocols\s+(.+?)\s*;", re.MULTILINE | re.IGNORECASE
-)
+_RE_NGINX_PROTOCOLS = re.compile(r"^\s*ssl_protocols\s+(.+?)\s*;", re.MULTILINE | re.IGNORECASE)
 # Nginx: ssl_ciphers 'HIGH:!aNULL:!MD5';
-_RE_NGINX_CIPHERS = re.compile(
-    r"^\s*ssl_ciphers\s+['\"]?(.+?)['\"]?\s*;", re.MULTILINE | re.IGNORECASE
-)
+_RE_NGINX_CIPHERS = re.compile(r"^\s*ssl_ciphers\s+['\"]?(.+?)['\"]?\s*;", re.MULTILINE | re.IGNORECASE)
 
 # Apache: SSLProtocol all -SSLv3 -TLSv1
-_RE_APACHE_PROTOCOLS = re.compile(
-    r"^\s*SSLProtocol\s+(.+?)$", re.MULTILINE | re.IGNORECASE
-)
+_RE_APACHE_PROTOCOLS = re.compile(r"^\s*SSLProtocol\s+(.+?)$", re.MULTILINE | re.IGNORECASE)
 # Apache: SSLCipherSuite HIGH:!aNULL
-_RE_APACHE_CIPHERS = re.compile(
-    r"^\s*SSLCipherSuite\s+['\"]?(.+?)['\"]?\s*$", re.MULTILINE | re.IGNORECASE
-)
+_RE_APACHE_CIPHERS = re.compile(r"^\s*SSLCipherSuite\s+['\"]?(.+?)['\"]?\s*$", re.MULTILINE | re.IGNORECASE)
 
 # HAProxy: ssl-default-bind-ciphers / ssl-default-bind-options
-_RE_HAPROXY_CIPHERS = re.compile(
-    r"^\s*ssl-default-bind-ciphers\s+(.+?)$", re.MULTILINE | re.IGNORECASE
-)
-_RE_HAPROXY_OPTIONS = re.compile(
-    r"^\s*ssl-default-bind-options\s+(.+?)$", re.MULTILINE | re.IGNORECASE
-)
+_RE_HAPROXY_CIPHERS = re.compile(r"^\s*ssl-default-bind-ciphers\s+(.+?)$", re.MULTILINE | re.IGNORECASE)
+_RE_HAPROXY_OPTIONS = re.compile(r"^\s*ssl-default-bind-options\s+(.+?)$", re.MULTILINE | re.IGNORECASE)
 
 
 def _line_number_of(content: str, pos: int) -> int:

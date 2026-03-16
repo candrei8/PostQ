@@ -1,10 +1,11 @@
 """Middleware chain — composable post-processing for scan findings."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
 from quant_scan.core.context import ScanContext
-from quant_scan.core.enums import QuantumRisk, Severity
+from quant_scan.core.enums import Severity
 from quant_scan.core.models import Finding
 
 
@@ -22,6 +23,7 @@ class ContextAnalysisMiddleware:
     def process(self, findings: list[Finding], context: ScanContext) -> list[Finding]:
         try:
             from quant_scan.scanners.context import ContextAnalyzer
+
             return ContextAnalyzer().analyze(findings)
         except ImportError:
             return findings
@@ -33,6 +35,7 @@ class ComplianceEnrichmentMiddleware:
     def process(self, findings: list[Finding], context: ScanContext) -> list[Finding]:
         try:
             from quant_scan.compliance.mapper import enrich_findings_with_compliance
+
             return enrich_findings_with_compliance(findings)
         except ImportError:
             return findings

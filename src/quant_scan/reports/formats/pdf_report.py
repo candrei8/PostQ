@@ -91,7 +91,9 @@ tbody tr:nth-child(even) { background: #f8f9fa; }
 <div class="cover">
     <h1>{{ t_title }}</h1>
     <h2>{{ t_subtitle }}</h2>
-    {% if client_name %}<p style="font-size: 14pt; margin-top: 1cm;">{{ t_prepared_for }}: <strong>{{ client_name }}</strong></p>{% endif %}
+    {% if client_name %}<p style="font-size: 14pt; margin-top: 1cm;">
+      {{ t_prepared_for }}: <strong>{{ client_name }}</strong>
+    </p>{% endif %}
     <div class="score-big">{{ score }}</div>
     <div class="grade-badge">{{ grade }}</div>
     <div class="meta">
@@ -108,10 +110,14 @@ tbody tr:nth-child(even) { background: #f8f9fa; }
 <div class="summary-grid">
     <div class="summary-card"><div class="label">{{ t_score_label }}</div><div class="value">{{ score }}/100</div></div>
     <div class="summary-card"><div class="label">{{ t_grade_label }}</div><div class="value">{{ grade }}</div></div>
-    <div class="summary-card"><div class="label">{{ t_pqc_readiness }}</div><div class="value">{{ pqc_readiness }}%</div></div>
-    <div class="summary-card"><div class="label">{{ t_total_findings }}</div><div class="value">{{ total_findings }}</div></div>
-    <div class="summary-card"><div class="label">{{ t_files_scanned }}</div><div class="value">{{ files_scanned }}</div></div>
-    <div class="summary-card"><div class="label">{{ t_scan_duration }}</div><div class="value">{{ duration }}s</div></div>
+    <div class="summary-card"><div class="label">{{ t_pqc_readiness }}</div>
+      <div class="value">{{ pqc_readiness }}%</div></div>
+    <div class="summary-card"><div class="label">{{ t_total_findings }}</div>
+      <div class="value">{{ total_findings }}</div></div>
+    <div class="summary-card"><div class="label">{{ t_files_scanned }}</div>
+      <div class="value">{{ files_scanned }}</div></div>
+    <div class="summary-card"><div class="label">{{ t_scan_duration }}</div>
+      <div class="value">{{ duration }}s</div></div>
 </div>
 
 {% if severity_pie_b64 %}
@@ -133,7 +139,9 @@ tbody tr:nth-child(even) { background: #f8f9fa; }
 {% if findings %}
 <table>
 <thead>
-<tr><th>{{ t_severity }}</th><th>{{ t_algorithm }}</th><th>{{ t_quantum_risk }}</th><th>{{ t_location }}</th><th>{{ t_message }}</th></tr>
+<tr><th>{{ t_severity }}</th><th>{{ t_algorithm }}</th>
+  <th>{{ t_quantum_risk }}</th><th>{{ t_location }}</th>
+  <th>{{ t_message }}</th></tr>
 </thead>
 <tbody>
 {% for f in findings %}
@@ -200,6 +208,7 @@ def render_pdf_html(
     risk_bar_b64 = ""
     try:
         from quant_scan.reports.charts import generate_risk_bar, generate_severity_pie
+
         severity_pie_b64 = generate_severity_pie(result)
         risk_bar_b64 = generate_risk_bar(result)
     except Exception:
@@ -223,17 +232,19 @@ def render_pdf_html(
     findings_data = []
     compliance_all: list[str] = []
     for f in result.findings:
-        findings_data.append({
-            "severity": f.severity.value,
-            "severity_label": severity_labels.get(f.severity.value, f.severity.value),
-            "algorithm_name": f.algorithm.name,
-            "quantum_risk": f.quantum_risk.value,
-            "quantum_risk_label": risk_labels.get(f.quantum_risk.value, f.quantum_risk.value),
-            "file_path": f.location.file_path.split("/")[-1].split("\\")[-1],
-            "line_number": f.location.line_number,
-            "message": f.message,
-            "recommendation": f.recommendation,
-        })
+        findings_data.append(
+            {
+                "severity": f.severity.value,
+                "severity_label": severity_labels.get(f.severity.value, f.severity.value),
+                "algorithm_name": f.algorithm.name,
+                "quantum_risk": f.quantum_risk.value,
+                "quantum_risk_label": risk_labels.get(f.quantum_risk.value, f.quantum_risk.value),
+                "file_path": f.location.file_path.split("/")[-1].split("\\")[-1],
+                "line_number": f.location.line_number,
+                "message": f.message,
+                "recommendation": f.recommendation,
+            }
+        )
         compliance_all.extend(f.compliance_refs)
 
     # Deduplicate compliance refs
@@ -316,6 +327,7 @@ def render_pdf(
     if output_path:
         try:
             from weasyprint import HTML
+
             HTML(string=html).write_pdf(output_path)
             logger.info("PDF written to %s", output_path)
             return f"PDF report written to {output_path}"

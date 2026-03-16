@@ -1,4 +1,5 @@
 """TypeScript language analyzer — loads rules from typescript.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

@@ -1,4 +1,5 @@
 """PHP language analyzer — loads rules from php.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

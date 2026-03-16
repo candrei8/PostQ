@@ -1,4 +1,5 @@
 """FastAPI application — REST API for quant-scan."""
+
 from __future__ import annotations
 
 import logging
@@ -35,6 +36,7 @@ def create_app():
 
     # Register routes
     from quant_scan.server.api.v1 import router as v1_router
+
     app.include_router(v1_router, prefix="/api/v1")
 
     @app.get("/health")

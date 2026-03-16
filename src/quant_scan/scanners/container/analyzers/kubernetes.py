@@ -1,4 +1,5 @@
 """Kubernetes manifest parser — detects crypto issues in K8s YAML."""
+
 from __future__ import annotations
 
 import re

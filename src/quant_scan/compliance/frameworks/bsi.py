@@ -2,6 +2,7 @@
 
 Maps findings to German Federal Office for Information Security technical recommendations.
 """
+
 from __future__ import annotations
 
 from quant_scan.compliance.mapper import ComplianceRef

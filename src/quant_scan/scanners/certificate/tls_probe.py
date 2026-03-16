@@ -5,19 +5,13 @@ from __future__ import annotations
 import logging
 import socket
 import ssl
-from typing import Any
 
 from cryptography import x509
-from cryptography.hazmat.primitives.serialization import Encoding
 
 from quant_scan.core.enums import QuantumRisk, Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 from quant_scan.scanners.certificate.cert_parser import (
-    _identify_hash_algorithm,
-    _identify_public_key,
-    _cert_description,
-    _make_finding,
     _parse_single_cert,
 )
 
@@ -86,7 +80,7 @@ def probe_tls_endpoint(
             with ctx.wrap_socket(sock, server_hostname=host) as tls_sock:
                 # --- Grab certificate ---
                 der_bytes = tls_sock.getpeercert(binary_form=True)
-                cipher_info = tls_sock.cipher()   # (name, version, bits)
+                cipher_info = tls_sock.cipher()  # (name, version, bits)
                 tls_version_str = tls_sock.version()  # e.g. "TLSv1.3"
 
     except socket.timeout:
@@ -109,9 +103,7 @@ def probe_tls_endpoint(
             cert_findings = _parse_single_cert(cert, endpoint, 0, algo_db)
             findings.extend(cert_findings)
         except Exception as exc:
-            logger.warning(
-                "Could not parse server certificate from %s: %s", endpoint, exc
-            )
+            logger.warning("Could not parse server certificate from %s: %s", endpoint, exc)
 
     # --- TLS version check ---
     if tls_version_str:
@@ -128,14 +120,8 @@ def probe_tls_endpoint(
                         description=f"Deprecated TLS version: {tls_version_str}",
                     ),
                     location=_make_tls_location(host, port, tls_version_str),
-                    message=(
-                        f"Endpoint {endpoint} uses deprecated "
-                        f"{tls_version_str}"
-                    ),
-                    recommendation=(
-                        "Upgrade to TLS 1.2 or TLS 1.3. TLS 1.0/1.1 are "
-                        "deprecated by IETF RFC 8996."
-                    ),
+                    message=(f"Endpoint {endpoint} uses deprecated {tls_version_str}"),
+                    recommendation=("Upgrade to TLS 1.2 or TLS 1.3. TLS 1.0/1.1 are deprecated by IETF RFC 8996."),
                     confidence=1.0,
                 )
             )
@@ -160,17 +146,14 @@ def probe_tls_endpoint(
                         severity=Severity.HIGH,
                         quantum_risk=algo.quantum_risk,
                         algorithm=algo,
-                        location=_make_tls_location(
-                            host, port, f"cipher={cipher_name}"
-                        ),
+                        location=_make_tls_location(host, port, f"cipher={cipher_name}"),
                         message=(
                             f"Endpoint {endpoint} negotiated cipher suite "
                             f"'{cipher_name}' containing weak component "
                             f"'{keyword}'"
                         ),
                         recommendation=(
-                            f"Disable cipher suites using {keyword}. "
-                            f"Use AEAD ciphers (AES-GCM, ChaCha20-Poly1305)."
+                            f"Disable cipher suites using {keyword}. Use AEAD ciphers (AES-GCM, ChaCha20-Poly1305)."
                         ),
                         confidence=1.0,
                     )
@@ -182,4 +165,5 @@ def probe_tls_endpoint(
 def _get_tls_family():
     """Return a safe AlgorithmFamily for TLS-level findings."""
     from quant_scan.core.enums import AlgorithmFamily
+
     return AlgorithmFamily.UNKNOWN

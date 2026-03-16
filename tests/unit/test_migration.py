@@ -1,12 +1,11 @@
 """Tests for migration planner."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding, ScanResult, ScanSummary
-from quant_scan.migration.planner import generate_migration_plan
 from quant_scan.migration.effort_estimator import estimate_hours, get_complexity, get_replacement_recommendation
+from quant_scan.migration.planner import generate_migration_plan
 from quant_scan.migration.vendor_recommender import recommend_vendor
 
 
@@ -19,9 +18,12 @@ def _make_result(findings: list[Finding]) -> ScanResult:
 
 def _make_finding(family: AlgorithmFamily) -> Finding:
     return Finding(
-        rule_id="TEST", severity=Severity.HIGH, quantum_risk=QuantumRisk.VULNERABLE,
+        rule_id="TEST",
+        severity=Severity.HIGH,
+        quantum_risk=QuantumRisk.VULNERABLE,
         algorithm=Algorithm(name=family.value, family=family, quantum_risk=QuantumRisk.VULNERABLE),
-        location=FileLocation(file_path="test.py", line_number=1), message="Test",
+        location=FileLocation(file_path="test.py", line_number=1),
+        message="Test",
     )
 
 

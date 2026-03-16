@@ -7,9 +7,8 @@ from pathlib import Path
 
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import dsa, ec, rsa
-from cryptography.hazmat.primitives.serialization import Encoding
 
-from quant_scan.core.enums import QuantumRisk, Severity
+from quant_scan.core.enums import Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 
@@ -21,19 +20,19 @@ logger = logging.getLogger(__name__)
 
 _SIG_HASH_MAP: dict[str, str] = {
     # RSA signatures
-    "1.2.840.113549.1.1.4": "MD5",         # md5WithRSAEncryption
-    "1.2.840.113549.1.1.5": "SHA-1",        # sha1WithRSAEncryption
-    "1.2.840.113549.1.1.11": "SHA-256",     # sha256WithRSAEncryption
-    "1.2.840.113549.1.1.12": "SHA-384",     # sha384WithRSAEncryption
-    "1.2.840.113549.1.1.13": "SHA-512",     # sha512WithRSAEncryption
+    "1.2.840.113549.1.1.4": "MD5",  # md5WithRSAEncryption
+    "1.2.840.113549.1.1.5": "SHA-1",  # sha1WithRSAEncryption
+    "1.2.840.113549.1.1.11": "SHA-256",  # sha256WithRSAEncryption
+    "1.2.840.113549.1.1.12": "SHA-384",  # sha384WithRSAEncryption
+    "1.2.840.113549.1.1.13": "SHA-512",  # sha512WithRSAEncryption
     # ECDSA signatures
-    "1.2.840.10045.4.1": "SHA-1",           # ecdsa-with-SHA1
-    "1.2.840.10045.4.3.2": "SHA-256",       # ecdsa-with-SHA256
-    "1.2.840.10045.4.3.3": "SHA-384",       # ecdsa-with-SHA384
-    "1.2.840.10045.4.3.4": "SHA-512",       # ecdsa-with-SHA512
+    "1.2.840.10045.4.1": "SHA-1",  # ecdsa-with-SHA1
+    "1.2.840.10045.4.3.2": "SHA-256",  # ecdsa-with-SHA256
+    "1.2.840.10045.4.3.3": "SHA-384",  # ecdsa-with-SHA384
+    "1.2.840.10045.4.3.4": "SHA-512",  # ecdsa-with-SHA512
     # DSA signatures
-    "2.16.840.1.101.3.4.3.1": "SHA-1",     # id-dsa-with-sha1
-    "2.16.840.1.101.3.4.3.2": "SHA-256",   # dsa-with-sha256
+    "2.16.840.1.101.3.4.3.1": "SHA-1",  # id-dsa-with-sha1
+    "2.16.840.1.101.3.4.3.2": "SHA-256",  # dsa-with-sha256
 }
 
 # Reverse lookup from algorithm name in the signature OID description
@@ -160,10 +159,7 @@ def _make_finding(
 
     if not recommendation:
         if algo.pqc_replacements:
-            recommendation = (
-                f"Migrate to post-quantum alternative: "
-                f"{', '.join(algo.pqc_replacements)}"
-            )
+            recommendation = f"Migrate to post-quantum alternative: {', '.join(algo.pqc_replacements)}"
         else:
             recommendation = "No action required — algorithm is quantum-safe."
 
@@ -282,9 +278,7 @@ def parse_certificate_file(file_path: str) -> list[Finding]:
             try:
                 certs = [x509.load_der_x509_certificate(raw)]
             except Exception as exc:
-                logger.debug(
-                    "File %s is neither valid PEM nor DER: %s", file_path, exc
-                )
+                logger.debug("File %s is neither valid PEM nor DER: %s", file_path, exc)
     elif suffix == ".der":
         try:
             certs = [x509.load_der_x509_certificate(raw)]
@@ -309,8 +303,6 @@ def parse_certificate_file(file_path: str) -> list[Finding]:
         try:
             findings.extend(_parse_single_cert(cert, file_path, idx, algo_db))
         except Exception as exc:
-            logger.warning(
-                "Error analysing certificate #%d in %s: %s", idx, file_path, exc
-            )
+            logger.warning("Error analysing certificate #%d in %s: %s", idx, file_path, exc)
 
     return findings

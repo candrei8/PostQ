@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from typing import Annotated, Optional
@@ -133,9 +132,16 @@ def scan(
 ) -> None:
     """Run a full scan (source code, certificates, configs, dependencies, secrets)."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
-        quality_gate=quality_gate, min_score=min_score,
-        max_critical=max_critical, max_high=max_high,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
+        quality_gate=quality_gate,
+        min_score=min_score,
+        max_critical=max_critical,
+        max_high=max_high,
     )
 
 
@@ -148,8 +154,10 @@ def source(
     languages: Annotated[
         Optional[list[str]],
         typer.Option(
-            "--languages", "-l",
-            help="Languages: python, java, javascript, golang, cpp, csharp, rust, swift, kotlin, php, ruby, typescript, scala, dart",
+            "--languages",
+            "-l",
+            help="Languages: python, java, javascript, golang, cpp, csharp, "
+            "rust, swift, kotlin, php, ruby, typescript, scala, dart",
         ),
     ] = None,
     exclude: Annotated[Optional[list[str]], _exclude_opt] = None,
@@ -157,7 +165,12 @@ def source(
 ) -> None:
     """Scan source code only."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
         scanner_names=["source"],
         languages=languages or [],
     )
@@ -174,7 +187,12 @@ def certificate(
 ) -> None:
     """Scan certificates only (.pem, .crt, .cer, .der files)."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
         scanner_names=["certificate"],
     )
 
@@ -190,7 +208,12 @@ def config(
 ) -> None:
     """Scan configuration files only (SSH, nginx, Apache, HAProxy)."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
         scanner_names=["config"],
     )
 
@@ -206,7 +229,12 @@ def dependencies(
 ) -> None:
     """Scan dependency files only (requirements.txt, package.json, pom.xml, go.mod)."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
         scanner_names=["dependency"],
     )
 
@@ -222,7 +250,12 @@ def secrets(
 ) -> None:
     """Scan for hardcoded secrets, private keys, and API credentials."""
     _run_scan(
-        target, format, output, severity, exclude or [], no_color,
+        target,
+        format,
+        output,
+        severity,
+        exclude or [],
+        no_color,
         scanner_names=["secrets"],
     )
 
@@ -230,12 +263,8 @@ def secrets(
 @app.command()
 def migrate(
     target: Annotated[list[Path], _target_arg],
-    organization: Annotated[
-        str, typer.Option("--organization", "--org", help="Organization name for the report")
-    ] = "",
-    hourly_rate: Annotated[
-        float, typer.Option("--hourly-rate", help="Hourly rate in EUR for cost estimation")
-    ] = 150.0,
+    organization: Annotated[str, typer.Option("--organization", "--org", help="Organization name for the report")] = "",
+    hourly_rate: Annotated[float, typer.Option("--hourly-rate", help="Hourly rate in EUR for cost estimation")] = 150.0,
     format: Annotated[str, _format_opt] = "console",
     output: Annotated[Optional[str], _output_opt] = None,
     severity: Annotated[str, _severity_opt] = "info",
@@ -307,6 +336,7 @@ def server(
     """Start the quant-scan API server (requires fastapi and uvicorn)."""
     try:
         import uvicorn
+
         from quant_scan.server.app import create_app
     except ImportError:
         typer.echo("Error: Install server dependencies: pip install quant-scan[server]", err=True)

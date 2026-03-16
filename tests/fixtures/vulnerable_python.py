@@ -6,11 +6,9 @@ Every import/usage here should trigger at least one finding.
 import hashlib
 import random
 
-from cryptography.hazmat.primitives.asymmetric import rsa, ec, dsa, dh
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.ciphers import algorithms
 from Crypto.Cipher import DES, DES3
 from Crypto.PublicKey import RSA as RSA_Key
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 
 # RSA key generation — quantum vulnerable
 private_key = rsa.generate_private_key(
@@ -40,5 +38,6 @@ triple_des = DES3.new(b"0123456789abcdef01234567", DES3.MODE_CBC, iv=b"12345678"
 crypto_key = random.randint(0, 2**128)
 
 # ECB mode — insecure
-from cryptography.hazmat.primitives.ciphers import modes
+from cryptography.hazmat.primitives.ciphers import modes  # noqa: E402
+
 ecb = modes.ECB()

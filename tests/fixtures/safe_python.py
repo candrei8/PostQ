@@ -5,7 +5,6 @@ This file should produce ZERO findings.
 
 import json
 import os
-import sys
 from pathlib import Path
 
 # Normal string operations — not crypto
@@ -19,7 +18,7 @@ if config_path.exists():
     config = json.loads(config_path.read_text())
 
 # Math operations (not crypto)
-result = 2 ** 256
+result = 2**256
 values = list(range(100))
 total = sum(values)
 

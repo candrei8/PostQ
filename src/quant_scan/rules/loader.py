@@ -76,12 +76,8 @@ class SourceRule:
         self.pattern = pattern
         self.message = message
         self.recommendation = recommendation
-        self.severity_override = (
-            Severity(severity_override) if severity_override else None
-        )
-        self.quantum_risk_override = (
-            QuantumRisk(quantum_risk_override) if quantum_risk_override else None
-        )
+        self.severity_override = Severity(severity_override) if severity_override else None
+        self.quantum_risk_override = QuantumRisk(quantum_risk_override) if quantum_risk_override else None
 
 
 def load_source_rules(language: str) -> list[SourceRule]:

@@ -1,6 +1,5 @@
 """Tests for the pattern matching engine."""
 
-from quant_scan.core.enums import QuantumRisk, Severity
 from quant_scan.rules.loader import load_source_rules
 from quant_scan.rules.matcher import RuleMatcher
 

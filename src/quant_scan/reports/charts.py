@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 def _fig_to_base64(fig: Any) -> str:
     """Convert a matplotlib figure to base64 PNG string."""
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight",
-                facecolor=fig.get_facecolor(), edgecolor="none")
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor(), edgecolor="none")
     buf.seek(0)
     b64 = base64.b64encode(buf.read()).decode("ascii")
     buf.close()
     import matplotlib.pyplot as plt
+
     plt.close(fig)
     return b64
 
@@ -29,6 +29,7 @@ def generate_severity_pie(result: ScanResult, colors: dict[str, str] | None = No
     """Generate a severity distribution pie chart as base64 PNG."""
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
@@ -60,8 +61,11 @@ def generate_severity_pie(result: ScanResult, colors: dict[str, str] | None = No
 
         fig, ax = plt.subplots(figsize=(6, 4), facecolor="#1a1a2e")
         wedges, texts, autotexts = ax.pie(
-            sizes, labels=labels, colors=chart_colors,
-            autopct="%1.0f%%", startangle=140,
+            sizes,
+            labels=labels,
+            colors=chart_colors,
+            autopct="%1.0f%%",
+            startangle=140,
             textprops={"color": "white", "fontsize": 9},
         )
         for t in autotexts:
@@ -80,6 +84,7 @@ def generate_risk_bar(result: ScanResult) -> str:
     """Generate a quantum risk distribution bar chart as base64 PNG."""
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
@@ -119,8 +124,14 @@ def generate_risk_bar(result: ScanResult) -> str:
         ax.set_ylabel("Findings", color="white")
 
         for bar, val in zip(bars, values):
-            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
-                    str(val), ha="center", color="white", fontweight="bold")
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 0.5,
+                str(val),
+                ha="center",
+                color="white",
+                fontweight="bold",
+            )
 
         return _fig_to_base64(fig)
 
@@ -133,6 +144,7 @@ def generate_score_gauge(score: float, grade: str) -> str:
     """Generate a score gauge chart as base64 PNG."""
     try:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         import numpy as np
@@ -142,7 +154,7 @@ def generate_score_gauge(score: float, grade: str) -> str:
 
         # Gauge from 0 to 100
         theta = np.linspace(np.pi, 0, 100)
-        r = np.ones(100)
+        np.ones(100)
 
         # Color gradient: red -> yellow -> green
         colors_arr = []
@@ -159,20 +171,25 @@ def generate_score_gauge(score: float, grade: str) -> str:
                 colors_arr.append("#27ae60")
 
         for i in range(99):
-            ax.bar(theta[i], 1, width=(theta[i] - theta[i + 1]),
-                   bottom=0.6, color=colors_arr[i], alpha=0.3)
+            ax.bar(theta[i], 1, width=(theta[i] - theta[i + 1]), bottom=0.6, color=colors_arr[i], alpha=0.3)
 
         # Filled portion
         score_idx = min(int(score), 99)
         for i in range(score_idx):
-            ax.bar(theta[i], 1, width=(theta[i] - theta[i + 1]),
-                   bottom=0.6, color=colors_arr[i], alpha=0.9)
+            ax.bar(theta[i], 1, width=(theta[i] - theta[i + 1]), bottom=0.6, color=colors_arr[i], alpha=0.9)
 
         # Score text
-        ax.text(np.pi / 2, 0.3, f"{score:.0f}", ha="center", va="center",
-                fontsize=28, fontweight="bold", color="white")
-        ax.text(np.pi / 2, -0.1, grade, ha="center", va="center",
-                fontsize=16, fontweight="bold", color=colors_arr[score_idx])
+        ax.text(np.pi / 2, 0.3, f"{score:.0f}", ha="center", va="center", fontsize=28, fontweight="bold", color="white")
+        ax.text(
+            np.pi / 2,
+            -0.1,
+            grade,
+            ha="center",
+            va="center",
+            fontsize=16,
+            fontweight="bold",
+            color=colors_arr[score_idx],
+        )
 
         ax.set_ylim(0, 1.7)
         ax.set_yticklabels([])

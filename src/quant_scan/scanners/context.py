@@ -6,20 +6,17 @@ import re
 
 from quant_scan.core.models import Finding
 
-
 # Patterns that indicate the line is a comment
 _COMMENT_PREFIXES = re.compile(r"^\s*(#|//|/\*|\*)")
 
 # Paths that suggest test / non-production code
-_TEST_PATH_SEGMENTS = {"test", "tests", "spec", "specs", "mock", "mocks",
-                       "__test__", "__tests__", "_test", "_tests"}
+_TEST_PATH_SEGMENTS = {"test", "tests", "spec", "specs", "mock", "mocks", "__test__", "__tests__", "_test", "_tests"}
 
 # Suppression markers that signal intentional acceptance of risk
 _SUPPRESSION_MARKERS = ("# noqa", "# nosec", "pragma: no cover")
 
 # Tokens in nearby context that raise confidence (sensitive data nearby)
-_SENSITIVE_TOKENS = {"password", "secret", "private_key", "credential",
-                     "credentials", "api_key", "apikey"}
+_SENSITIVE_TOKENS = {"password", "secret", "private_key", "credential", "credentials", "api_key", "apikey"}
 
 # Tokens in nearby context that lower confidence (demo / test context)
 _DEMO_TOKENS = {"test", "example", "sample", "demo", "mock"}
@@ -113,13 +110,9 @@ class ContextAnalyzer:
         return confidence
 
     @staticmethod
-    def _apply_sensitive_context_rule(
-        finding: Finding, confidence: float
-    ) -> float:
+    def _apply_sensitive_context_rule(finding: Finding, confidence: float) -> float:
         """Increase confidence when nearby lines mention sensitive data."""
-        context_text = " ".join(
-            finding.location.context_before + finding.location.context_after
-        ).lower()
+        context_text = " ".join(finding.location.context_before + finding.location.context_after).lower()
         for token in _SENSITIVE_TOKENS:
             if token in context_text:
                 return min(confidence + 0.2, 1.0)
@@ -128,9 +121,7 @@ class ContextAnalyzer:
     @staticmethod
     def _apply_demo_context_rule(finding: Finding, confidence: float) -> float:
         """Reduce confidence when nearby lines suggest demo/test usage."""
-        context_text = " ".join(
-            finding.location.context_before + finding.location.context_after
-        ).lower()
+        context_text = " ".join(finding.location.context_before + finding.location.context_after).lower()
         for token in _DEMO_TOKENS:
             if token in context_text:
                 return confidence - 0.2

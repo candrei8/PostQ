@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from jinja2 import Template
 
-from quant_scan.core.enums import QuantumRisk, Severity
+from quant_scan.core.enums import Severity
 from quant_scan.core.models import Finding, ScanResult
 
 # ---------------------------------------------------------------------------
@@ -27,7 +27,8 @@ _HTML_TEMPLATE = Template(
   --critical:#e74c3c;--high:#e67e22;--medium:#f1c40f;--low:#3498db;--info:#7f8c8d;
   --safe:#2ecc71;--vulnerable:#e74c3c;--weakened:#f39c12;
 }
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+  line-height:1.6;padding:0}
 a{color:var(--accent);text-decoration:none}
 
 /* ---------- Layout ---------- */
@@ -36,22 +37,34 @@ header{text-align:center;padding:40px 0 32px;border-bottom:1px solid var(--borde
 header h1{font-size:2rem;font-weight:700;letter-spacing:-.5px}
 header .meta{color:var(--text-dim);font-size:.85rem;margin-top:8px}
 section{margin-top:40px}
-section h2{font-size:1.25rem;font-weight:600;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-footer{text-align:center;color:var(--text-dim);font-size:.8rem;margin-top:56px;padding-top:24px;border-top:1px solid var(--border)}
+section h2{font-size:1.25rem;font-weight:600;margin-bottom:16px;
+  padding-bottom:8px;border-bottom:1px solid var(--border)}
+footer{text-align:center;color:var(--text-dim);font-size:.8rem;
+  margin-top:56px;padding-top:24px;border-top:1px solid var(--border)}
 
 /* ---------- Executive summary cards ---------- */
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.summary-grid{display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center}
-.card .label{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px}
+.card .label{font-size:.75rem;text-transform:uppercase;
+  letter-spacing:1px;color:var(--text-dim);margin-bottom:6px}
 .card .value{font-size:1.75rem;font-weight:700}
 
 /* ---------- Score gauge ---------- */
 .gauge-wrap{display:flex;justify-content:center;align-items:center;margin-bottom:24px}
 .gauge{position:relative;width:160px;height:80px;overflow:hidden}
-.gauge::before{content:'';display:block;width:160px;height:160px;border-radius:50%;border:14px solid var(--surface2);border-bottom-color:transparent;border-left-color:transparent;transform:rotate(225deg)}
-.gauge .fill{position:absolute;top:0;left:0;width:160px;height:160px;border-radius:50%;border:14px solid transparent;border-bottom-color:transparent;border-left-color:transparent;transform:rotate(225deg)}
-.gauge .score-text{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:1.6rem;font-weight:700}
-.gauge .grade-text{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.85rem;color:var(--text-dim)}
+.gauge::before{content:'';display:block;width:160px;height:160px;
+  border-radius:50%;border:14px solid var(--surface2);
+  border-bottom-color:transparent;border-left-color:transparent;
+  transform:rotate(225deg)}
+.gauge .fill{position:absolute;top:0;left:0;width:160px;height:160px;
+  border-radius:50%;border:14px solid transparent;
+  border-bottom-color:transparent;border-left-color:transparent;
+  transform:rotate(225deg)}
+.gauge .score-text{position:absolute;bottom:4px;left:50%;
+  transform:translateX(-50%);font-size:1.6rem;font-weight:700}
+.gauge .grade-text{position:absolute;bottom:-18px;left:50%;
+  transform:translateX(-50%);font-size:.85rem;color:var(--text-dim)}
 
 /* Simpler CSS-only score bar */
 .score-bar-wrap{width:100%;max-width:400px;margin:0 auto 8px}
@@ -64,15 +77,22 @@ footer{text-align:center;color:var(--text-dim);font-size:.8rem;margin-top:56px;p
 .bar-row{display:flex;align-items:center;margin-bottom:6px}
 .bar-label{width:100px;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim)}
 .bar-track{flex:1;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative}
-.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:.75rem;font-weight:600;color:#fff;min-width:fit-content;transition:width .4s}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;
+  padding-left:8px;font-size:.75rem;font-weight:600;color:#fff;
+  min-width:fit-content;transition:width .4s}
 .bar-count{margin-left:8px;font-size:.8rem;color:var(--text-dim)}
 
 /* ---------- Findings table ---------- */
 .findings-table{width:100%;border-collapse:collapse;font-size:.85rem}
-.findings-table th{background:var(--surface);text-align:left;padding:10px 12px;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);border-bottom:2px solid var(--border);position:sticky;top:0}
+.findings-table th{background:var(--surface);text-align:left;
+  padding:10px 12px;font-weight:600;font-size:.75rem;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);
+  border-bottom:2px solid var(--border);position:sticky;top:0}
 .findings-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
 .findings-table tr:hover td{background:var(--surface2)}
-.badge{display:inline-block;padding:2px 10px;border-radius:4px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.badge{display:inline-block;padding:2px 10px;border-radius:4px;
+  font-size:.75rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.3px}
 .badge-critical{background:rgba(231,76,60,.18);color:var(--critical)}
 .badge-high{background:rgba(230,126,34,.18);color:var(--high)}
 .badge-medium{background:rgba(241,196,15,.15);color:var(--medium)}
@@ -86,14 +106,18 @@ footer{text-align:center;color:var(--text-dim);font-size:.8rem;margin-top:56px;p
 
 /* ---------- Recommendations ---------- */
 .rec-list{list-style:none;padding:0}
-.rec-list li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:10px}
+.rec-list li{background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:14px 18px;margin-bottom:10px}
 .rec-list .algo{font-weight:600;color:var(--accent)}
 .rec-list .action{margin-top:4px;color:var(--text)}
 .rec-list .pqc{margin-top:4px;font-size:.85rem;color:var(--safe)}
 
 /* ---------- Compliance ---------- */
 .compliance-table{width:100%;border-collapse:collapse;font-size:.85rem}
-.compliance-table th{background:var(--surface);text-align:left;padding:10px 12px;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);border-bottom:2px solid var(--border)}
+.compliance-table th{background:var(--surface);text-align:left;
+  padding:10px 12px;font-weight:600;font-size:.75rem;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);
+  border-bottom:2px solid var(--border)}
 .compliance-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
 .compliance-table tr:hover td{background:var(--surface2)}
 .status-non_compliant{color:var(--critical);font-weight:600}
@@ -337,9 +361,7 @@ def _readiness_color(pct: float) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _severity_bars(
-    by_severity: dict[str, int], total: int
-) -> list[tuple[str, int, str, float]]:
+def _severity_bars(by_severity: dict[str, int], total: int) -> list[tuple[str, int, str, float]]:
     """Return (label, count, color, percentage) for each severity level."""
     order = ["critical", "high", "medium", "low", "info"]
     bars: list[tuple[str, int, str, float]] = []
@@ -350,9 +372,7 @@ def _severity_bars(
     return bars
 
 
-def _risk_bars(
-    by_risk: dict[str, int], total: int
-) -> list[tuple[str, int, str, float]]:
+def _risk_bars(by_risk: dict[str, int], total: int) -> list[tuple[str, int, str, float]]:
     order = ["vulnerable", "weakened", "safe", "unknown"]
     bars: list[tuple[str, int, str, float]] = []
     for name in order:
@@ -403,11 +423,7 @@ def _unique_recommendations(
         if f.algorithm.name in seen or not f.recommendation:
             continue
         seen.add(f.algorithm.name)
-        replacements = (
-            ", ".join(f.algorithm.pqc_replacements)
-            if f.algorithm.pqc_replacements
-            else ""
-        )
+        replacements = ", ".join(f.algorithm.pqc_replacements) if f.algorithm.pqc_replacements else ""
         recs.append((f.algorithm.name, f.recommendation, replacements))
     return recs
 

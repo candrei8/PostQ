@@ -43,19 +43,13 @@ class QualityGate:
         high_count = result.summary.by_severity.get("high", 0)
 
         if score < self.min_score:
-            reasons.append(
-                f"Score {score} is below minimum {self.min_score}"
-            )
+            reasons.append(f"Score {score} is below minimum {self.min_score}")
 
         if critical_count > self.max_critical:
-            reasons.append(
-                f"Critical findings: {critical_count} (max allowed: {self.max_critical})"
-            )
+            reasons.append(f"Critical findings: {critical_count} (max allowed: {self.max_critical})")
 
         if high_count > self.max_high:
-            reasons.append(
-                f"High findings: {high_count} (max allowed: {self.max_high})"
-            )
+            reasons.append(f"High findings: {high_count} (max allowed: {self.max_high})")
 
         return QualityGateResult(
             passed=len(reasons) == 0,

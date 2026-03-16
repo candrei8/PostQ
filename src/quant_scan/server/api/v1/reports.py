@@ -1,4 +1,5 @@
 """Report endpoints — generate reports from scan results."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -30,6 +31,7 @@ async def get_report(scan_id: str, format: str):
         return HTMLResponse(content=report_text)
     elif format == "json" or format == "cbom":
         import json
+
         return JSONResponse(content=json.loads(report_text))
     else:
         return {"report": report_text}
@@ -48,6 +50,7 @@ async def get_migration_plan(scan_id: str, organization: str = "", hourly_rate: 
     result = ScanResult.model_validate(scan["result"])
 
     from quant_scan.migration.planner import generate_migration_plan
+
     plan = generate_migration_plan(result, organization=organization, hourly_rate=hourly_rate)
     return plan.model_dump(mode="json")
 
@@ -65,5 +68,6 @@ async def get_compliance_gaps(scan_id: str):
     result = ScanResult.model_validate(scan["result"])
 
     from quant_scan.compliance.gap_analysis import analyze_compliance_gaps
+
     gaps = analyze_compliance_gaps(result)
     return gaps.model_dump(mode="json")

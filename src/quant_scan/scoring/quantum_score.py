@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
+from quant_scan.core.enums import AlgorithmFamily, QuantumRisk
 from quant_scan.core.models import Finding
 
 

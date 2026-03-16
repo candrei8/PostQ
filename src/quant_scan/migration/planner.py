@@ -78,9 +78,7 @@ def generate_migration_plan(
             else QuantumRisk.WEAKENED
         )
 
-        priority = _PRIORITY_MAP.get(
-            (worst_severity, worst_risk), 3
-        )
+        priority = _PRIORITY_MAP.get((worst_severity, worst_risk), 3)
         phase = _PRIORITY_TO_PHASE.get(priority, 3)
 
         # Estimate effort
@@ -99,28 +97,28 @@ def generate_migration_plan(
             is_critical=(priority <= 2),
         )
 
-        tasks.append(MigrationTask(
-            id=f"MIG-{task_id:03d}",
-            title=f"Migrate {family} to {to_algo}",
-            description=(
-                f"Replace {len(findings)} instances of {family} across "
-                f"{file_count} files with post-quantum safe alternative"
-            ),
-            from_algorithm=family,
-            to_algorithm=to_algo,
-            priority=priority,
-            risk_level=worst_severity.value,
-            estimated_hours=total_hours,
-            estimated_cost_eur=cost,
-            complexity=get_complexity(total_hours),
-            affected_files=family_files[:20],  # Cap display
-            affected_file_count=file_count,
-            phase=phase,
-            recommended_approach=(
-                "hybrid_transition" if priority <= 2 else "direct_replacement"
-            ),
-            vendor_recommendation=vendor,
-        ))
+        tasks.append(
+            MigrationTask(
+                id=f"MIG-{task_id:03d}",
+                title=f"Migrate {family} to {to_algo}",
+                description=(
+                    f"Replace {len(findings)} instances of {family} across "
+                    f"{file_count} files with post-quantum safe alternative"
+                ),
+                from_algorithm=family,
+                to_algorithm=to_algo,
+                priority=priority,
+                risk_level=worst_severity.value,
+                estimated_hours=total_hours,
+                estimated_cost_eur=cost,
+                complexity=get_complexity(total_hours),
+                affected_files=family_files[:20],  # Cap display
+                affected_file_count=file_count,
+                phase=phase,
+                recommended_approach=("hybrid_transition" if priority <= 2 else "direct_replacement"),
+                vendor_recommendation=vendor,
+            )
+        )
 
     # Organize into phases
     phases: list[MigrationPhase] = []
@@ -128,14 +126,16 @@ def generate_migration_plan(
         phase_tasks = [t for t in tasks if t.phase == phase_num]
         if not phase_tasks:
             continue
-        phases.append(MigrationPhase(
-            phase_number=phase_num,
-            name=phase_name,
-            description=phase_desc,
-            tasks=phase_tasks,
-            total_hours=sum(t.estimated_hours for t in phase_tasks),
-            total_cost_eur=sum(t.estimated_cost_eur for t in phase_tasks),
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_number=phase_num,
+                name=phase_name,
+                description=phase_desc,
+                tasks=phase_tasks,
+                total_hours=sum(t.estimated_hours for t in phase_tasks),
+                total_cost_eur=sum(t.estimated_cost_eur for t in phase_tasks),
+            )
+        )
 
     total_hours = sum(p.total_hours for p in phases)
     total_cost = sum(p.total_cost_eur for p in phases)
@@ -153,9 +153,7 @@ def generate_migration_plan(
         f"({total_cost:,.0f} EUR). "
     )
     if critical_count > 0:
-        executive_summary += (
-            f"{critical_count} critical tasks require immediate attention. "
-        )
+        executive_summary += f"{critical_count} critical tasks require immediate attention. "
     if high_count > 0:
         executive_summary += f"{high_count} high-priority tasks should begin within 6 months. "
 

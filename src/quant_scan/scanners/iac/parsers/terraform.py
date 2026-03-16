@@ -1,4 +1,5 @@
 """Terraform parser — detects crypto configurations in .tf files."""
+
 from __future__ import annotations
 
 import re
@@ -10,9 +11,7 @@ from quant_scan.core.models import Algorithm, FileLocation, Finding
 _PATTERNS = [
     # tls_private_key with RSA
     (
-        re.compile(
-            r'resource\s+"tls_private_key".*?algorithm\s*=\s*"RSA"', re.DOTALL
-        ),
+        re.compile(r'resource\s+"tls_private_key".*?algorithm\s*=\s*"RSA"', re.DOTALL),
         "IAC-TF-TLS-RSA",
         Severity.HIGH,
         QuantumRisk.VULNERABLE,
@@ -23,9 +22,7 @@ _PATTERNS = [
     ),
     # tls_private_key with ECDSA
     (
-        re.compile(
-            r'resource\s+"tls_private_key".*?algorithm\s*=\s*"ECDSA"', re.DOTALL
-        ),
+        re.compile(r'resource\s+"tls_private_key".*?algorithm\s*=\s*"ECDSA"', re.DOTALL),
         "IAC-TF-TLS-ECDSA",
         Severity.HIGH,
         QuantumRisk.VULNERABLE,

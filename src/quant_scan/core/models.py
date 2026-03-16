@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
-
 
 # ---------------------------------------------------------------------------
 # Algorithm metadata
@@ -97,8 +95,6 @@ class ScanResult(BaseModel):
     findings: list[Finding] = Field(default_factory=list)
     summary: ScanSummary = Field(default_factory=ScanSummary)
     targets: list[str] = Field(default_factory=list)
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     scanner_version: str = "0.1.0"
     duration_seconds: float = 0.0

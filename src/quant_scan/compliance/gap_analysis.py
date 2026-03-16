@@ -1,4 +1,5 @@
 """Compliance gap analysis — evaluates compliance posture per framework."""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -60,9 +61,7 @@ def analyze_compliance_gaps(result: ScanResult) -> GapAnalysisReport:
                 fw_data["compliant"] += 1
             elif ref.status == "non_compliant":
                 fw_data["non_compliant"] += 1
-                fw_data["critical_gaps"].append(
-                    f"{ref.requirement_id}: {ref.description}"
-                )
+                fw_data["critical_gaps"].append(f"{ref.requirement_id}: {ref.description}")
             elif ref.status == "action_required":
                 fw_data["action_required"] += 1
             if ref.deadline:
@@ -105,9 +104,7 @@ def analyze_compliance_gaps(result: ScanResult) -> GapAnalysisReport:
     # Overall compliance
     overall_pct = 0.0
     if frameworks:
-        overall_pct = round(
-            sum(f.compliance_percentage for f in frameworks) / len(frameworks), 1
-        )
+        overall_pct = round(sum(f.compliance_percentage for f in frameworks) / len(frameworks), 1)
 
     # Most critical framework (lowest compliance %)
     most_critical = ""

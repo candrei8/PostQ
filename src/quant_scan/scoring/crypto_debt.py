@@ -12,18 +12,24 @@ from quant_scan.core.models import Finding, ScanResult
 # Weight per finding category
 _CATEGORY_WEIGHTS: dict[str, float] = {
     "asymmetric_vulnerable": 10.0,  # RSA, ECC, DSA, DH — Shor's attack
-    "symmetric_weakened": 3.0,      # AES-128, Blowfish — Grover's attack
-    "classically_broken": 8.0,      # DES, 3DES, RC4, MD5, SHA-1
-    "hash_deprecated": 5.0,         # MD5, SHA-1
+    "symmetric_weakened": 3.0,  # AES-128, Blowfish — Grover's attack
+    "classically_broken": 8.0,  # DES, 3DES, RC4, MD5, SHA-1
+    "hash_deprecated": 5.0,  # MD5, SHA-1
 }
 
 _ASYMMETRIC_FAMILIES = {
-    AlgorithmFamily.RSA, AlgorithmFamily.ECC, AlgorithmFamily.ECDSA,
-    AlgorithmFamily.ECDH, AlgorithmFamily.DSA, AlgorithmFamily.DH,
+    AlgorithmFamily.RSA,
+    AlgorithmFamily.ECC,
+    AlgorithmFamily.ECDSA,
+    AlgorithmFamily.ECDH,
+    AlgorithmFamily.DSA,
+    AlgorithmFamily.DH,
 }
 
 _CLASSICALLY_BROKEN = {
-    AlgorithmFamily.DES, AlgorithmFamily.TRIPLE_DES, AlgorithmFamily.RC4,
+    AlgorithmFamily.DES,
+    AlgorithmFamily.TRIPLE_DES,
+    AlgorithmFamily.RC4,
 }
 
 _HASH_DEPRECATED = {AlgorithmFamily.MD5, AlgorithmFamily.SHA1}

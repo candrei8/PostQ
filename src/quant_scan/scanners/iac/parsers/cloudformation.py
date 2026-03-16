@@ -1,4 +1,5 @@
 """CloudFormation parser — detects crypto configurations in CFN templates."""
+
 from __future__ import annotations
 
 import re
@@ -53,9 +54,7 @@ _PATTERNS = [
     ),
     # CloudFront MinimumProtocolVersion
     (
-        re.compile(
-            r"MinimumProtocolVersion\s*:\s*(TLSv1|TLSv1_2016|SSLv3)", re.IGNORECASE
-        ),
+        re.compile(r"MinimumProtocolVersion\s*:\s*(TLSv1|TLSv1_2016|SSLv3)", re.IGNORECASE),
         "IAC-CFN-CF-WEAK-TLS",
         Severity.HIGH,
         QuantumRisk.VULNERABLE,

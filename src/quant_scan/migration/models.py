@@ -43,9 +43,7 @@ class MigrationPlan(BaseModel):
     """Complete organizational PQC migration plan."""
 
     organization: str = ""
-    generated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     total_findings: int = 0
     total_tasks: int = 0
     phases: list[MigrationPhase] = Field(default_factory=list)

@@ -1,17 +1,18 @@
 """Tests for quantum timeline predictor and HNDL risk."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding
-from quant_scan.quantum_timeline.predictor import predict_timeline, predict_timelines
 from quant_scan.quantum_timeline.hndl import compute_hndl_risk
+from quant_scan.quantum_timeline.predictor import predict_timeline, predict_timelines
 
 
 def _make_finding(family: AlgorithmFamily, key_size: int | None = None) -> Finding:
     return Finding(
-        rule_id="TEST", severity=Severity.HIGH, quantum_risk=QuantumRisk.VULNERABLE,
+        rule_id="TEST",
+        severity=Severity.HIGH,
+        quantum_risk=QuantumRisk.VULNERABLE,
         algorithm=Algorithm(name=family.value, family=family, key_size=key_size, quantum_risk=QuantumRisk.VULNERABLE),
         location=FileLocation(file_path="test.py", line_number=1),
         message="Test",
@@ -34,9 +35,12 @@ def test_predict_ecc():
 
 def test_predict_safe_returns_none():
     finding = Finding(
-        rule_id="TEST", severity=Severity.INFO, quantum_risk=QuantumRisk.SAFE,
+        rule_id="TEST",
+        severity=Severity.INFO,
+        quantum_risk=QuantumRisk.SAFE,
         algorithm=Algorithm(name="AES-256", family=AlgorithmFamily.AES, quantum_risk=QuantumRisk.SAFE),
-        location=FileLocation(file_path="test.py", line_number=1), message="Test",
+        location=FileLocation(file_path="test.py", line_number=1),
+        message="Test",
     )
     assert predict_timeline(finding) is None
 

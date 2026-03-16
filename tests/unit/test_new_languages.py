@@ -1,8 +1,10 @@
 """Tests for new language analyzers (Rust, Swift, Kotlin, PHP, Ruby, TypeScript, Scala, Dart)."""
+
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from quant_scan.scanners.source.languages import get_language_analyzer
 
@@ -51,8 +53,20 @@ def test_analyzer_empty_file(lang, fixture):
 def test_all_14_languages_available():
     """All 14 languages should be available."""
     all_langs = [
-        "python", "java", "javascript", "golang", "cpp", "csharp",
-        "rust", "swift", "kotlin", "php", "ruby", "typescript", "scala", "dart",
+        "python",
+        "java",
+        "javascript",
+        "golang",
+        "cpp",
+        "csharp",
+        "rust",
+        "swift",
+        "kotlin",
+        "php",
+        "ruby",
+        "typescript",
+        "scala",
+        "dart",
     ]
     for lang in all_langs:
         assert get_language_analyzer(lang) is not None, f"Language {lang} not available"

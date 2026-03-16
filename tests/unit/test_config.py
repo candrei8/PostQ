@@ -1,8 +1,9 @@
 """Tests for configuration system."""
+
 from __future__ import annotations
 
+from quant_scan.config.profiles import get_profile
 from quant_scan.config.schema import ScanConfig
-from quant_scan.config.profiles import get_profile, PROFILES
 
 
 def test_default_config():

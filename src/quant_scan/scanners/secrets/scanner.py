@@ -1,4 +1,5 @@
 """Secrets scanner — detects hardcoded cryptographic secrets and keys."""
+
 from __future__ import annotations
 
 import math
@@ -25,7 +26,11 @@ _PEM_PATTERNS = [
 _API_KEY_PATTERNS = [
     (re.compile(r"AKIA[0-9A-Z]{16}"), "AWS-Access-Key", Severity.CRITICAL),
     (re.compile(r"https://[a-zA-Z0-9-]+\.vault\.azure\.net/keys/"), "Azure-Key-Vault-URL", Severity.HIGH),
-    (re.compile(r"projects/[a-zA-Z0-9-]+/locations/[a-zA-Z0-9-]+/keyRings/[a-zA-Z0-9-]+/cryptoKeys/"), "GCP-KMS-Key", Severity.HIGH),
+    (
+        re.compile(r"projects/[a-zA-Z0-9-]+/locations/[a-zA-Z0-9-]+/keyRings/[a-zA-Z0-9-]+/cryptoKeys/"),
+        "GCP-KMS-Key",
+        Severity.HIGH,
+    ),
     (re.compile(r"hvs\.[a-zA-Z0-9]{24,}"), "HashiCorp-Vault-Token", Severity.CRITICAL),
 ]
 
@@ -38,27 +43,98 @@ _WEAK_KEYGEN_PATTERNS = [
 
 # File extensions to skip (binary, media, etc.)
 _SKIP_EXTENSIONS = {
-    ".pem", ".crt", ".cer", ".der", ".p12", ".pfx", ".key",  # cert/key files handled by cert scanner
-    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".svg", ".bmp",
-    ".zip", ".tar", ".gz", ".bz2", ".xz", ".7z", ".rar",
-    ".exe", ".dll", ".so", ".dylib", ".o", ".a",
-    ".pyc", ".pyo", ".class", ".jar", ".war",
-    ".woff", ".woff2", ".ttf", ".eot",
-    ".mp3", ".mp4", ".avi", ".mov", ".wav",
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
+    ".pem",
+    ".crt",
+    ".cer",
+    ".der",
+    ".p12",
+    ".pfx",
+    ".key",  # cert/key files handled by cert scanner
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".ico",
+    ".svg",
+    ".bmp",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".rar",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".o",
+    ".a",
+    ".pyc",
+    ".pyo",
+    ".class",
+    ".jar",
+    ".war",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".mp3",
+    ".mp4",
+    ".avi",
+    ".mov",
+    ".wav",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
 }
 
 # Source code extensions to scan
 _SOURCE_EXTENSIONS = {
-    ".py", ".java", ".js", ".ts", ".jsx", ".tsx", ".go",
-    ".c", ".cpp", ".cc", ".h", ".hpp", ".cs",
-    ".rs", ".swift", ".kt", ".kts", ".php", ".rb",
-    ".scala", ".sc", ".dart",
-    ".yaml", ".yml", ".json", ".xml", ".toml", ".ini", ".cfg",
-    ".sh", ".bash", ".zsh", ".ps1", ".bat", ".cmd",
-    ".env", ".properties", ".conf",
-    ".tf", ".hcl",
-    ".dockerfile", ".docker-compose.yml",
+    ".py",
+    ".java",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".go",
+    ".c",
+    ".cpp",
+    ".cc",
+    ".h",
+    ".hpp",
+    ".cs",
+    ".rs",
+    ".swift",
+    ".kt",
+    ".kts",
+    ".php",
+    ".rb",
+    ".scala",
+    ".sc",
+    ".dart",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".xml",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".ps1",
+    ".bat",
+    ".cmd",
+    ".env",
+    ".properties",
+    ".conf",
+    ".tf",
+    ".hcl",
+    ".dockerfile",
+    ".docker-compose.yml",
 }
 
 
@@ -98,82 +174,95 @@ class SecretScanner(BaseScanner):
                 # Check PEM patterns
                 for pattern, key_type, family, severity in _PEM_PATTERNS:
                     if pattern.search(line):
-                        context_before = lines[max(0, line_num - 4):line_num - 1]
-                        context_after = lines[line_num:min(len(lines), line_num + 3)]
-                        findings.append(Finding(
-                            rule_id=f"SEC-PEM-{key_type.upper().replace('#', '').replace('.', '')}",
-                            severity=severity,
-                            quantum_risk=QuantumRisk.VULNERABLE,
-                            algorithm=Algorithm(
-                                name=f"{key_type}-PrivateKey",
-                                family=family,
+                        context_before = lines[max(0, line_num - 4) : line_num - 1]
+                        context_after = lines[line_num : min(len(lines), line_num + 3)]
+                        findings.append(
+                            Finding(
+                                rule_id=f"SEC-PEM-{key_type.upper().replace('#', '').replace('.', '')}",
+                                severity=severity,
                                 quantum_risk=QuantumRisk.VULNERABLE,
-                                description=f"Hardcoded {key_type} private key in source code",
-                            ),
-                            location=FileLocation(
-                                file_path=str(file_path),
-                                line_number=line_num,
-                                line_content=line.strip(),
-                                context_before=context_before,
-                                context_after=context_after,
-                            ),
-                            message=f"Hardcoded {key_type} private key detected in source code",
-                            recommendation="Remove private keys from source code. Use secure key management (HSM, vault, environment variables)",
-                            scanner_type=self.name,
-                        ))
+                                algorithm=Algorithm(
+                                    name=f"{key_type}-PrivateKey",
+                                    family=family,
+                                    quantum_risk=QuantumRisk.VULNERABLE,
+                                    description=f"Hardcoded {key_type} private key in source code",
+                                ),
+                                location=FileLocation(
+                                    file_path=str(file_path),
+                                    line_number=line_num,
+                                    line_content=line.strip(),
+                                    context_before=context_before,
+                                    context_after=context_after,
+                                ),
+                                message=f"Hardcoded {key_type} private key detected in source code",
+                                recommendation=(
+                                    "Remove private keys from source code. "
+                                    "Use secure key management "
+                                    "(HSM, vault, environment variables)"
+                                ),
+                                scanner_type=self.name,
+                            )
+                        )
 
                 # Check API key patterns
                 for pattern, service, severity in _API_KEY_PATTERNS:
                     if pattern.search(line):
-                        context_before = lines[max(0, line_num - 4):line_num - 1]
-                        context_after = lines[line_num:min(len(lines), line_num + 3)]
-                        findings.append(Finding(
-                            rule_id=f"SEC-APIKEY-{service.upper().replace('-', '')}",
-                            severity=severity,
-                            quantum_risk=QuantumRisk.UNKNOWN,
-                            algorithm=Algorithm(
-                                name=f"{service}-Credential",
-                                family=AlgorithmFamily.UNKNOWN,
+                        context_before = lines[max(0, line_num - 4) : line_num - 1]
+                        context_after = lines[line_num : min(len(lines), line_num + 3)]
+                        findings.append(
+                            Finding(
+                                rule_id=f"SEC-APIKEY-{service.upper().replace('-', '')}",
+                                severity=severity,
                                 quantum_risk=QuantumRisk.UNKNOWN,
-                                description=f"Hardcoded {service} credential",
-                            ),
-                            location=FileLocation(
-                                file_path=str(file_path),
-                                line_number=line_num,
-                                line_content=line.strip(),
-                                context_before=context_before,
-                                context_after=context_after,
-                            ),
-                            message=f"Hardcoded {service} credential detected",
-                            recommendation="Use environment variables or secret management services",
-                            scanner_type=self.name,
-                        ))
+                                algorithm=Algorithm(
+                                    name=f"{service}-Credential",
+                                    family=AlgorithmFamily.UNKNOWN,
+                                    quantum_risk=QuantumRisk.UNKNOWN,
+                                    description=f"Hardcoded {service} credential",
+                                ),
+                                location=FileLocation(
+                                    file_path=str(file_path),
+                                    line_number=line_num,
+                                    line_content=line.strip(),
+                                    context_before=context_before,
+                                    context_after=context_after,
+                                ),
+                                message=f"Hardcoded {service} credential detected",
+                                recommendation="Use environment variables or secret management services",
+                                scanner_type=self.name,
+                            )
+                        )
 
                 # Check weak key generation patterns
                 for pattern, issue_type, severity in _WEAK_KEYGEN_PATTERNS:
                     if pattern.search(line):
-                        context_before = lines[max(0, line_num - 4):line_num - 1]
-                        context_after = lines[line_num:min(len(lines), line_num + 3)]
-                        findings.append(Finding(
-                            rule_id=f"SEC-WEAK-{issue_type.upper().replace('-', '')}",
-                            severity=severity,
-                            quantum_risk=QuantumRisk.UNKNOWN,
-                            algorithm=Algorithm(
-                                name=issue_type,
-                                family=AlgorithmFamily.RANDOM,
+                        context_before = lines[max(0, line_num - 4) : line_num - 1]
+                        context_after = lines[line_num : min(len(lines), line_num + 3)]
+                        findings.append(
+                            Finding(
+                                rule_id=f"SEC-WEAK-{issue_type.upper().replace('-', '')}",
+                                severity=severity,
                                 quantum_risk=QuantumRisk.UNKNOWN,
-                                description=f"Weak cryptographic practice: {issue_type}",
-                            ),
-                            location=FileLocation(
-                                file_path=str(file_path),
-                                line_number=line_num,
-                                line_content=line.strip(),
-                                context_before=context_before,
-                                context_after=context_after,
-                            ),
-                            message=f"Weak cryptographic practice detected: {issue_type.replace('-', ' ').lower()}",
-                            recommendation="Use cryptographically secure random number generators and proper key management",
-                            scanner_type=self.name,
-                        ))
+                                algorithm=Algorithm(
+                                    name=issue_type,
+                                    family=AlgorithmFamily.RANDOM,
+                                    quantum_risk=QuantumRisk.UNKNOWN,
+                                    description=f"Weak cryptographic practice: {issue_type}",
+                                ),
+                                location=FileLocation(
+                                    file_path=str(file_path),
+                                    line_number=line_num,
+                                    line_content=line.strip(),
+                                    context_before=context_before,
+                                    context_after=context_after,
+                                ),
+                                message=f"Weak cryptographic practice detected: {issue_type.replace('-', ' ').lower()}",
+                                recommendation=(
+                                    "Use cryptographically secure random "
+                                    "number generators and proper key management"
+                                ),
+                                scanner_type=self.name,
+                            )
+                        )
 
         return findings

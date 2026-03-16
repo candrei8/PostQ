@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from quant_scan.core.enums import QuantumRisk, Severity
-from quant_scan.core.models import Algorithm, FileLocation, Finding
+from quant_scan.core.models import FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 
 # ---------------------------------------------------------------------------
@@ -116,10 +116,7 @@ _PYTHON_CRYPTO_LIBS: list[dict[str, Any]] = [
         "severity": Severity.HIGH,
         "quantum_risk": QuantumRisk.VULNERABLE,
         "algorithm_key": "RSA-generic",
-        "message": (
-            "Python dependency 'rsa' detected. Pure-Python RSA library — all "
-            "usage is quantum-vulnerable."
-        ),
+        "message": ("Python dependency 'rsa' detected. Pure-Python RSA library — all usage is quantum-vulnerable."),
         "recommendation": (
             "Migrate all RSA operations to PQC algorithms. Replace RSA "
             "signatures with ML-DSA and RSA key exchange with ML-KEM."
@@ -131,14 +128,8 @@ _PYTHON_CRYPTO_LIBS: list[dict[str, Any]] = [
         "severity": Severity.HIGH,
         "quantum_risk": QuantumRisk.VULNERABLE,
         "algorithm_key": "ECDSA-generic",
-        "message": (
-            "Python dependency 'ecdsa' detected. Pure-Python ECDSA library — "
-            "all usage is quantum-vulnerable."
-        ),
-        "recommendation": (
-            "Migrate all ECDSA operations to PQC signature algorithms such as "
-            "ML-DSA-44 or ML-DSA-65."
-        ),
+        "message": ("Python dependency 'ecdsa' detected. Pure-Python ECDSA library — all usage is quantum-vulnerable."),
+        "recommendation": ("Migrate all ECDSA operations to PQC signature algorithms such as ML-DSA-44 or ML-DSA-65."),
     },
 ]
 
@@ -186,9 +177,9 @@ def _extract_packages_pyproject(content: str) -> list[tuple[str, int]]:
     for line_no, line in enumerate(content.splitlines(), start=1):
         stripped = line.strip()
         # Detect dependency list sections
-        if re.match(
-            r"^(dependencies|optional-dependencies\.\w+)\s*=\s*\[", stripped
-        ) or stripped in ("dependencies = [",):
+        if re.match(r"^(dependencies|optional-dependencies\.\w+)\s*=\s*\[", stripped) or stripped in (
+            "dependencies = [",
+        ):
             in_deps = True
             continue
         if stripped.startswith("["):
@@ -262,9 +253,7 @@ def analyze_python_deps(file_path: str, content: str) -> list[Finding]:
     for pkg_name, line_no in packages:
         normalized = _normalize_package_name(pkg_name)
         for lib_info in _PYTHON_CRYPTO_LIBS:
-            normalized_known = [
-                _normalize_package_name(n) for n in lib_info["names"]
-            ]
+            normalized_known = [_normalize_package_name(n) for n in lib_info["names"]]
             if normalized in normalized_known:
                 algo_key = lib_info["algorithm_key"]
                 algo = algorithms.get(algo_key)

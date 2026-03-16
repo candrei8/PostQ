@@ -1,4 +1,5 @@
 """IaC scanner — detects crypto configurations in infrastructure code."""
+
 from __future__ import annotations
 
 import logging
@@ -37,9 +38,7 @@ class IacScanner(BaseScanner):
                 )
 
                 findings.extend(parse_cloudformation(str(file_path), content))
-            elif any(
-                kw in content for kw in ("hosts:", "tasks:", "- name:", "ansible")
-            ):
+            elif any(kw in content for kw in ("hosts:", "tasks:", "- name:", "ansible")):
                 from quant_scan.scanners.iac.parsers.ansible import parse_ansible
 
                 findings.extend(parse_ansible(str(file_path), content))

@@ -27,8 +27,8 @@ def generate_report(result: ScanResult, fmt: str, output_file: str | None = None
 
         text = render_sarif(result)
     elif fmt == "cbom":
-        from quant_scan.cbom.generator import generate_cbom
         from quant_scan.cbom.formats.cyclonedx import render_cyclonedx
+        from quant_scan.cbom.generator import generate_cbom
 
         cbom = generate_cbom(result)
         text = render_cyclonedx(cbom)

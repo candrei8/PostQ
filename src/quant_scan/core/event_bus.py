@@ -1,9 +1,10 @@
 """Event bus — lightweight pub/sub for scan pipeline events."""
+
 from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from typing import Any, Callable
+from typing import Callable
 
 from quant_scan.core.events import ScanEvent
 

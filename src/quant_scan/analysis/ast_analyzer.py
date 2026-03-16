@@ -75,8 +75,8 @@ class PythonCryptoVisitor(ast.NodeVisitor):
         return ""
 
     def _get_context(self, lineno: int) -> tuple[list[str], list[str]]:
-        before = self.source_lines[max(0, lineno - 4):lineno - 1]
-        after = self.source_lines[lineno:min(len(self.source_lines), lineno + 3)]
+        before = self.source_lines[max(0, lineno - 4) : lineno - 1]
+        after = self.source_lines[lineno : min(len(self.source_lines), lineno + 3)]
         return before, after
 
     def _add_finding(
@@ -93,23 +93,30 @@ class PythonCryptoVisitor(ast.NodeVisitor):
     ) -> None:
         lineno = getattr(node, "lineno", 0)
         before, after = self._get_context(lineno)
-        self.findings.append(Finding(
-            rule_id=rule_id,
-            severity=severity,
-            quantum_risk=risk,
-            algorithm=Algorithm(
-                name=algo_name, family=family, key_size=key_size,
-                quantum_risk=risk, description=message,
-            ),
-            location=FileLocation(
-                file_path=self.file_path, line_number=lineno,
-                line_content=self._get_line_content(lineno),
-                context_before=before, context_after=after,
-            ),
-            message=message,
-            recommendation=recommendation,
-            confidence=0.95,  # High confidence from AST analysis
-        ))
+        self.findings.append(
+            Finding(
+                rule_id=rule_id,
+                severity=severity,
+                quantum_risk=risk,
+                algorithm=Algorithm(
+                    name=algo_name,
+                    family=family,
+                    key_size=key_size,
+                    quantum_risk=risk,
+                    description=message,
+                ),
+                location=FileLocation(
+                    file_path=self.file_path,
+                    line_number=lineno,
+                    line_content=self._get_line_content(lineno),
+                    context_before=before,
+                    context_after=after,
+                ),
+                message=message,
+                recommendation=recommendation,
+                confidence=0.95,  # High confidence from AST analysis
+            )
+        )
 
     def _check_crypto_call(self, node: ast.Call, func_name: str) -> None:
         """Check if a function call is crypto-related."""
@@ -119,15 +126,24 @@ class PythonCryptoVisitor(ast.NodeVisitor):
             if isinstance(key_size, int):
                 severity = Severity.CRITICAL if key_size < 2048 else Severity.HIGH
                 self._add_finding(
-                    node, f"AST-PY-RSA-{key_size}", severity, QuantumRisk.VULNERABLE,
-                    AlgorithmFamily.RSA, f"RSA-{key_size}",
+                    node,
+                    f"AST-PY-RSA-{key_size}",
+                    severity,
+                    QuantumRisk.VULNERABLE,
+                    AlgorithmFamily.RSA,
+                    f"RSA-{key_size}",
                     f"RSA key generation with {key_size}-bit key (confirmed by AST)",
-                    "Migrate to ML-DSA (FIPS 204)", key_size=key_size,
+                    "Migrate to ML-DSA (FIPS 204)",
+                    key_size=key_size,
                 )
             else:
                 self._add_finding(
-                    node, "AST-PY-RSA-GEN", Severity.HIGH, QuantumRisk.VULNERABLE,
-                    AlgorithmFamily.RSA, "RSA-generic",
+                    node,
+                    "AST-PY-RSA-GEN",
+                    Severity.HIGH,
+                    QuantumRisk.VULNERABLE,
+                    AlgorithmFamily.RSA,
+                    "RSA-generic",
                     "RSA key generation detected (confirmed by AST)",
                     "Migrate to ML-DSA (FIPS 204)",
                 )
@@ -135,8 +151,12 @@ class PythonCryptoVisitor(ast.NodeVisitor):
         # EC key generation
         elif "generate_private_key" in func_name and "ec" in func_name.lower():
             self._add_finding(
-                node, "AST-PY-ECC-GEN", Severity.HIGH, QuantumRisk.VULNERABLE,
-                AlgorithmFamily.ECC, "ECC-generic",
+                node,
+                "AST-PY-ECC-GEN",
+                Severity.HIGH,
+                QuantumRisk.VULNERABLE,
+                AlgorithmFamily.ECC,
+                "ECC-generic",
                 "EC key generation detected (confirmed by AST)",
                 "Migrate to ML-KEM (FIPS 203)",
             )
@@ -144,8 +164,12 @@ class PythonCryptoVisitor(ast.NodeVisitor):
         # hashlib.md5()
         elif func_name in ("hashlib.md5", "md5"):
             self._add_finding(
-                node, "AST-PY-MD5", Severity.HIGH, QuantumRisk.VULNERABLE,
-                AlgorithmFamily.MD5, "MD5",
+                node,
+                "AST-PY-MD5",
+                Severity.HIGH,
+                QuantumRisk.VULNERABLE,
+                AlgorithmFamily.MD5,
+                "MD5",
                 "MD5 hash usage detected (confirmed by AST)",
                 "Replace with SHA-256 or SHA-3",
             )
@@ -153,19 +177,30 @@ class PythonCryptoVisitor(ast.NodeVisitor):
         # hashlib.sha1()
         elif func_name in ("hashlib.sha1", "sha1"):
             self._add_finding(
-                node, "AST-PY-SHA1", Severity.HIGH, QuantumRisk.VULNERABLE,
-                AlgorithmFamily.SHA1, "SHA-1",
+                node,
+                "AST-PY-SHA1",
+                Severity.HIGH,
+                QuantumRisk.VULNERABLE,
+                AlgorithmFamily.SHA1,
+                "SHA-1",
                 "SHA-1 hash usage detected (confirmed by AST)",
                 "Replace with SHA-256 or SHA-3",
             )
 
         # random.random() / random.randint() — insecure PRNG
         elif func_name.startswith("random.") and func_name in (
-            "random.random", "random.randint", "random.choice", "random.seed"
+            "random.random",
+            "random.randint",
+            "random.choice",
+            "random.seed",
         ):
             self._add_finding(
-                node, "AST-PY-WEAK-RANDOM", Severity.MEDIUM, QuantumRisk.UNKNOWN,
-                AlgorithmFamily.RANDOM, "WeakRandom",
+                node,
+                "AST-PY-WEAK-RANDOM",
+                Severity.MEDIUM,
+                QuantumRisk.UNKNOWN,
+                AlgorithmFamily.RANDOM,
+                "WeakRandom",
                 "Non-cryptographic PRNG used (confirmed by AST)",
                 "Use secrets module or os.urandom() for cryptographic randomness",
             )

@@ -1,4 +1,5 @@
 """Project endpoints — manage scan projects."""
+
 from __future__ import annotations
 
 import uuid
@@ -15,6 +16,7 @@ _project_store: dict[str, dict[str, Any]] = {}
 
 class ProjectCreate(BaseModel):
     """Request body for creating a project."""
+
     name: str
     description: str = ""
     organization: str = ""
@@ -23,6 +25,7 @@ class ProjectCreate(BaseModel):
 
 class Project(BaseModel):
     """Project response model."""
+
     id: str
     name: str
     description: str = ""

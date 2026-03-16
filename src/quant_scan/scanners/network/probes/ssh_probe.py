@@ -1,4 +1,5 @@
 """SSH endpoint probe — analyzes SSH server algorithms."""
+
 from __future__ import annotations
 
 import logging
@@ -56,11 +57,11 @@ def _parse_name_list(data: bytes, offset: int) -> tuple[list[str], int]:
     """Parse an SSH name-list (uint32 length + comma-separated string)."""
     if offset + 4 > len(data):
         return [], offset
-    length = struct.unpack(">I", data[offset:offset + 4])[0]
+    length = struct.unpack(">I", data[offset : offset + 4])[0]
     offset += 4
     if offset + length > len(data):
         return [], offset
-    names = data[offset:offset + length].decode("ascii", errors="ignore")
+    names = data[offset : offset + length].decode("ascii", errors="ignore")
     offset += length
     return names.split(",") if names else [], offset
 
@@ -74,7 +75,7 @@ def probe_ssh(host: str, port: int = 22) -> list[Finding]:
         sock.settimeout(_TIMEOUT)
 
         # Read server banner
-        banner = sock.recv(256).decode("ascii", errors="ignore").strip()
+        sock.recv(256).decode("ascii", errors="ignore").strip()
 
         # Send our banner
         sock.sendall(b"SSH-2.0-quant-scan-probe\r\n")
@@ -109,7 +110,7 @@ def probe_ssh(host: str, port: int = 22) -> list[Finding]:
         if len(payload) < 18:
             return findings
 
-        padding_len = payload[0]
+        payload[0]
         msg_type = payload[1]
 
         # msg_type 20 = SSH_MSG_KEXINIT
@@ -132,35 +133,43 @@ def probe_ssh(host: str, port: int = 22) -> list[Finding]:
             if algo in _WEAK_KEX:
                 sev, name, family = _WEAK_KEX[algo]
                 risk = QuantumRisk.VULNERABLE
-                findings.append(Finding(
-                    rule_id=f"NET-SSH-KEX-{name.upper().replace('-', '')}",
-                    severity=sev,
-                    quantum_risk=risk,
-                    algorithm=Algorithm(
-                        name=name, family=family, quantum_risk=risk,
-                        description=f"SSH KEX: {algo}",
-                    ),
-                    location=_make_location(host, port, f"KEX: {algo}"),
-                    message=f"SSH server supports weak/quantum-vulnerable key exchange: {algo}",
-                    recommendation="Disable weak KEX. Use curve25519-sha256 or sntrup761x25519-sha512",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id=f"NET-SSH-KEX-{name.upper().replace('-', '')}",
+                        severity=sev,
+                        quantum_risk=risk,
+                        algorithm=Algorithm(
+                            name=name,
+                            family=family,
+                            quantum_risk=risk,
+                            description=f"SSH KEX: {algo}",
+                        ),
+                        location=_make_location(host, port, f"KEX: {algo}"),
+                        message=f"SSH server supports weak/quantum-vulnerable key exchange: {algo}",
+                        recommendation="Disable weak KEX. Use curve25519-sha256 or sntrup761x25519-sha512",
+                    )
+                )
 
         # Analyze host key algorithms
         for algo in host_key_algos:
             if algo in _WEAK_HOST_KEYS:
                 sev, name, family = _WEAK_HOST_KEYS[algo]
-                findings.append(Finding(
-                    rule_id=f"NET-SSH-HOSTKEY-{name.upper().replace('-', '')}",
-                    severity=sev,
-                    quantum_risk=QuantumRisk.VULNERABLE,
-                    algorithm=Algorithm(
-                        name=name, family=family, quantum_risk=QuantumRisk.VULNERABLE,
-                        description=f"SSH host key: {algo}",
-                    ),
-                    location=_make_location(host, port, f"HostKey: {algo}"),
-                    message=f"SSH server supports quantum-vulnerable host key: {algo}",
-                    recommendation="Use Ed25519 host keys. Plan migration to PQC host keys",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id=f"NET-SSH-HOSTKEY-{name.upper().replace('-', '')}",
+                        severity=sev,
+                        quantum_risk=QuantumRisk.VULNERABLE,
+                        algorithm=Algorithm(
+                            name=name,
+                            family=family,
+                            quantum_risk=QuantumRisk.VULNERABLE,
+                            description=f"SSH host key: {algo}",
+                        ),
+                        location=_make_location(host, port, f"HostKey: {algo}"),
+                        message=f"SSH server supports quantum-vulnerable host key: {algo}",
+                        recommendation="Use Ed25519 host keys. Plan migration to PQC host keys",
+                    )
+                )
 
         # Analyze ciphers (union of c2s and s2c)
         all_ciphers = set(cipher_c2s) | set(cipher_s2c)
@@ -168,37 +177,48 @@ def probe_ssh(host: str, port: int = 22) -> list[Finding]:
             if algo in _WEAK_CIPHERS:
                 sev, name, family = _WEAK_CIPHERS[algo]
                 risk = QuantumRisk.WEAKENED if family == AlgorithmFamily.AES else QuantumRisk.VULNERABLE
-                findings.append(Finding(
-                    rule_id=f"NET-SSH-CIPHER-{name.upper().replace('-', '')}",
-                    severity=sev,
-                    quantum_risk=risk,
-                    algorithm=Algorithm(
-                        name=name, family=family, quantum_risk=risk,
-                        description=f"SSH cipher: {algo}",
-                    ),
-                    location=_make_location(host, port, f"Cipher: {algo}"),
-                    message=f"SSH server supports weak cipher: {algo}",
-                    recommendation="Use AES-256-GCM or ChaCha20-Poly1305",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id=f"NET-SSH-CIPHER-{name.upper().replace('-', '')}",
+                        severity=sev,
+                        quantum_risk=risk,
+                        algorithm=Algorithm(
+                            name=name,
+                            family=family,
+                            quantum_risk=risk,
+                            description=f"SSH cipher: {algo}",
+                        ),
+                        location=_make_location(host, port, f"Cipher: {algo}"),
+                        message=f"SSH server supports weak cipher: {algo}",
+                        recommendation="Use AES-256-GCM or ChaCha20-Poly1305",
+                    )
+                )
 
         # Analyze MACs
         all_macs = set(mac_c2s) | set(mac_s2c)
         for algo in all_macs:
             if algo in _WEAK_MACS:
                 sev, name, family = _WEAK_MACS[algo]
-                findings.append(Finding(
-                    rule_id=f"NET-SSH-MAC-{name.upper().replace('-', '')}",
-                    severity=sev,
-                    quantum_risk=QuantumRisk.VULNERABLE if family in (AlgorithmFamily.MD5,) else QuantumRisk.WEAKENED,
-                    algorithm=Algorithm(
-                        name=name, family=family,
-                        quantum_risk=QuantumRisk.VULNERABLE if family == AlgorithmFamily.MD5 else QuantumRisk.WEAKENED,
-                        description=f"SSH MAC: {algo}",
-                    ),
-                    location=_make_location(host, port, f"MAC: {algo}"),
-                    message=f"SSH server supports weak MAC: {algo}",
-                    recommendation="Use HMAC-SHA2-256 or HMAC-SHA2-512",
-                ))
+                findings.append(
+                    Finding(
+                        rule_id=f"NET-SSH-MAC-{name.upper().replace('-', '')}",
+                        severity=sev,
+                        quantum_risk=QuantumRisk.VULNERABLE
+                        if family in (AlgorithmFamily.MD5,)
+                        else QuantumRisk.WEAKENED,
+                        algorithm=Algorithm(
+                            name=name,
+                            family=family,
+                            quantum_risk=QuantumRisk.VULNERABLE
+                            if family == AlgorithmFamily.MD5
+                            else QuantumRisk.WEAKENED,
+                            description=f"SSH MAC: {algo}",
+                        ),
+                        location=_make_location(host, port, f"MAC: {algo}"),
+                        message=f"SSH server supports weak MAC: {algo}",
+                        recommendation="Use HMAC-SHA2-256 or HMAC-SHA2-512",
+                    )
+                )
 
     except (socket.error, OSError) as e:
         logger.info("SSH probe failed for %s:%d: %s", host, port, e)

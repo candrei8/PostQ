@@ -130,9 +130,7 @@ def render_console(result: ScanResult) -> str:
         console.print(rec_table)
 
     console.print()
-    console.print(
-        f"[dim]Scan completed in {result.duration_seconds:.2f}s[/dim]"
-    )
+    console.print(f"[dim]Scan completed in {result.duration_seconds:.2f}s[/dim]")
     console.print()
     return buf.getvalue()
 

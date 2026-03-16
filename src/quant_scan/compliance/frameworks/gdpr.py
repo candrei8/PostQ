@@ -23,7 +23,11 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
             ComplianceRef(
                 framework="GDPR",
                 requirement_id="Art 32.1.a",
-                description='Encryption as appropriate measure — algorithm is quantum-vulnerable; "state of the art" requires planning PQC migration',
+                description=(
+                    "Encryption as appropriate measure — algorithm is "
+                    'quantum-vulnerable; "state of the art" requires '
+                    "planning PQC migration"
+                ),
                 status="action_required",
             )
         )

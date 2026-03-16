@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from quant_scan.core.enums import QuantumRisk, Severity
-from quant_scan.core.models import Algorithm, FileLocation, Finding
+from quant_scan.core.models import FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 
 # ---------------------------------------------------------------------------
@@ -200,9 +200,7 @@ def analyze_java_deps(file_path: str, content: str) -> list[Finding]:
                     if algo is None:
                         continue
 
-                    line_content = (
-                        lines[line_no - 1] if line_no <= len(lines) else ""
-                    )
+                    line_content = lines[line_no - 1] if line_no <= len(lines) else ""
 
                     findings.append(
                         Finding(

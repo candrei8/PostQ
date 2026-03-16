@@ -1,4 +1,5 @@
 """Tests for compliance gap analysis."""
+
 from __future__ import annotations
 
 from quant_scan.compliance.gap_analysis import analyze_compliance_gaps
@@ -9,9 +10,12 @@ from quant_scan.core.models import Algorithm, FileLocation, Finding, ScanResult,
 def test_gap_analysis_with_findings():
     findings = [
         Finding(
-            rule_id="TEST", severity=Severity.HIGH, quantum_risk=QuantumRisk.VULNERABLE,
+            rule_id="TEST",
+            severity=Severity.HIGH,
+            quantum_risk=QuantumRisk.VULNERABLE,
             algorithm=Algorithm(name="RSA", family=AlgorithmFamily.RSA, quantum_risk=QuantumRisk.VULNERABLE),
-            location=FileLocation(file_path="test.py", line_number=1), message="RSA",
+            location=FileLocation(file_path="test.py", line_number=1),
+            message="RSA",
         ),
     ]
     result = ScanResult(findings=findings, summary=ScanSummary(total_findings=1))

@@ -1,4 +1,5 @@
 """Dockerfile parser — detects crypto issues in Dockerfiles."""
+
 from __future__ import annotations
 
 import re

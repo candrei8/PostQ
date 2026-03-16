@@ -1,4 +1,5 @@
 """Binary scanner — detects crypto usage in compiled binaries."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Extended integration tests -- full scans with new scanners."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,7 +8,6 @@ import pytest
 
 from quant_scan.core.context import ScanContext
 from quant_scan.core.engine import ScanEngine
-
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 
@@ -25,6 +25,7 @@ def test_full_scan_all_scanners():
 def test_scan_with_quality_gate():
     """Scan results should work with quality gate evaluation."""
     from quant_scan.cicd.quality_gate import QualityGate
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)
@@ -36,6 +37,7 @@ def test_scan_with_quality_gate():
 def test_scan_with_migration_plan():
     """Scan results should produce a migration plan."""
     from quant_scan.migration.planner import generate_migration_plan
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)
@@ -47,6 +49,7 @@ def test_scan_with_migration_plan():
 def test_scan_with_cbom():
     """Scan results should produce a valid CBOM."""
     from quant_scan.cbom.generator import generate_cbom
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)
@@ -58,6 +61,7 @@ def test_scan_with_cbom():
 def test_scan_with_gap_analysis():
     """Scan results should produce gap analysis."""
     from quant_scan.compliance.gap_analysis import analyze_compliance_gaps
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)
@@ -69,7 +73,9 @@ def test_scan_with_gap_analysis():
 def test_scan_sarif_output():
     """SARIF output should be valid JSON."""
     import json
+
     from quant_scan.reports.formats.sarif_report import render_sarif
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)
@@ -82,6 +88,7 @@ def test_scan_sarif_output():
 def test_scan_pdf_output():
     """PDF HTML output should contain key sections."""
     from quant_scan.reports.formats.pdf_report import render_pdf_html
+
     ctx = ScanContext(targets=[FIXTURES])
     engine = ScanEngine()
     result = engine.run(ctx)

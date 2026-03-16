@@ -1,4 +1,5 @@
 """Compliance framework mapper — enriches findings with regulatory references."""
+
 from __future__ import annotations
 
 import importlib
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ComplianceRef:
     """A reference to a specific compliance framework requirement."""
+
     framework: str
     requirement_id: str
     description: str

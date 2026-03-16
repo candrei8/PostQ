@@ -8,7 +8,6 @@ from quant_scan.scanners.base import BaseScanner
 from quant_scan.scanners.registry import register
 from quant_scan.scanners.source.languages import get_language_analyzer
 
-
 # Map file extensions to language names
 _EXT_TO_LANG: dict[str, str] = {
     ".py": "python",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from quant_scan.core.enums import QuantumRisk, Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding
@@ -26,9 +26,7 @@ class RuleMatcher:
         self._compiled: list[CompiledRule] = []
         for r in rules:
             try:
-                self._compiled.append(
-                    CompiledRule(rule=r, regex=re.compile(r.pattern))
-                )
+                self._compiled.append(CompiledRule(rule=r, regex=re.compile(r.pattern)))
             except re.error:
                 pass  # skip malformed regex
 
@@ -46,9 +44,7 @@ class RuleMatcher:
         for cr in self._compiled:
             if cr.regex.search(line):
                 algo = self._resolve_algorithm(cr.rule)
-                severity = cr.rule.severity_override or self._algo_severity(
-                    cr.rule.algorithm_key
-                )
+                severity = cr.rule.severity_override or self._algo_severity(cr.rule.algorithm_key)
                 qr = cr.rule.quantum_risk_override or algo.quantum_risk
 
                 findings.append(

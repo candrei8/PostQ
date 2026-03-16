@@ -1,4 +1,5 @@
 """Tests for new compliance frameworks."""
+
 from __future__ import annotations
 
 import pytest
@@ -25,10 +26,22 @@ def test_mapper_loads_all_frameworks():
     assert len(mapper._frameworks) >= 14
 
 
-@pytest.mark.parametrize("framework_name", [
-    "iso27001", "pci_dss", "gdpr", "hipaa", "dora", "nis2",
-    "eidas", "soc2", "bsi", "anssi", "cnss",
-])
+@pytest.mark.parametrize(
+    "framework_name",
+    [
+        "iso27001",
+        "pci_dss",
+        "gdpr",
+        "hipaa",
+        "dora",
+        "nis2",
+        "eidas",
+        "soc2",
+        "bsi",
+        "anssi",
+        "cnss",
+    ],
+)
 def test_framework_maps_rsa_finding(framework_name):
     """Each framework should produce refs for RSA finding."""
     mapper = ComplianceMapper(enabled_frameworks=[framework_name])
@@ -37,10 +50,22 @@ def test_framework_maps_rsa_finding(framework_name):
     assert len(refs) > 0, f"Framework {framework_name} produced no refs for RSA"
 
 
-@pytest.mark.parametrize("framework_name", [
-    "iso27001", "pci_dss", "gdpr", "hipaa", "dora", "nis2",
-    "eidas", "soc2", "bsi", "anssi", "cnss",
-])
+@pytest.mark.parametrize(
+    "framework_name",
+    [
+        "iso27001",
+        "pci_dss",
+        "gdpr",
+        "hipaa",
+        "dora",
+        "nis2",
+        "eidas",
+        "soc2",
+        "bsi",
+        "anssi",
+        "cnss",
+    ],
+)
 def test_framework_maps_des_finding(framework_name):
     """Each framework should produce refs for DES finding."""
     mapper = ComplianceMapper(enabled_frameworks=[framework_name])

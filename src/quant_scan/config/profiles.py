@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from quant_scan.config.schema import (
-    ComplianceSection,
     PerformanceSection,
-    QualityGateSection,
     ScanConfig,
-    ScanSection,
     ScannersSection,
+    ScanSection,
 )
 
 PROFILES: dict[str, ScanConfig] = {
@@ -24,22 +22,24 @@ PROFILES: dict[str, ScanConfig] = {
     ),
     "deep": ScanConfig(
         scan=ScanSection(min_severity="info"),
-        scanners=ScannersSection(
-            enabled=["source", "certificate", "config", "dependency", "secrets", "iac"]
-        ),
+        scanners=ScannersSection(enabled=["source", "certificate", "config", "dependency", "secrets", "iac"]),
         performance=PerformanceSection(max_workers=4, max_file_size_mb=50),
     ),
     "paranoid": ScanConfig(
         scan=ScanSection(min_severity="info"),
         scanners=ScannersSection(
             enabled=[
-                "source", "certificate", "config", "dependency",
-                "secrets", "iac", "binary", "network",
+                "source",
+                "certificate",
+                "config",
+                "dependency",
+                "secrets",
+                "iac",
+                "binary",
+                "network",
             ]
         ),
-        performance=PerformanceSection(
-            max_workers=4, max_file_size_mb=100, file_cache=False
-        ),
+        performance=PerformanceSection(max_workers=4, max_file_size_mb=100, file_cache=False),
     ),
 }
 

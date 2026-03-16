@@ -1,7 +1,8 @@
 """Tests for internationalization."""
+
 from __future__ import annotations
 
-from quant_scan.reports.i18n import t, available_languages
+from quant_scan.reports.i18n import available_languages, t
 
 
 def test_english_strings():

@@ -1,4 +1,5 @@
 """Scan endpoints — create and retrieve scans."""
+
 from __future__ import annotations
 
 import uuid
@@ -6,13 +7,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from quant_scan.core.context import ScanContext
 from quant_scan.core.engine import ScanEngine
 from quant_scan.core.enums import Severity
-from quant_scan.core.models import ScanResult
 from quant_scan.server.api.v1 import router
 
 # In-memory store (replace with DB in production)
@@ -21,6 +21,7 @@ _scan_store: dict[str, dict[str, Any]] = {}
 
 class ScanRequest(BaseModel):
     """Request body for creating a scan."""
+
     targets: list[str] = Field(default_factory=lambda: ["."])
     severity: str = "info"
     exclude_patterns: list[str] = Field(default_factory=list)
@@ -30,6 +31,7 @@ class ScanRequest(BaseModel):
 
 class ScanStatus(BaseModel):
     """Status of a scan."""
+
     id: str
     status: str  # "pending", "running", "completed", "failed"
     created_at: str

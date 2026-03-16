@@ -1,4 +1,5 @@
 """CycloneDX 1.6 CBOM format — standardized crypto inventory."""
+
 from __future__ import annotations
 
 import json
@@ -65,21 +66,13 @@ def render_cyclonedx(cbom: CryptoBOM) -> str:
         }
 
         if asset.key_size:
-            component["cryptoProperties"]["algorithmProperties"][
-                "parameterSetIdentifier"
-            ] = str(asset.key_size)
+            component["cryptoProperties"]["algorithmProperties"]["parameterSetIdentifier"] = str(asset.key_size)
 
         if asset.pqc_replacements:
-            component["cryptoProperties"]["algorithmProperties"][
-                "certificationLevel"
-            ] = asset.pqc_replacements
+            component["cryptoProperties"]["algorithmProperties"]["certificationLevel"] = asset.pqc_replacements
 
         if asset.locations:
-            component["evidence"] = {
-                "occurrences": [
-                    {"location": loc} for loc in asset.locations[:20]
-                ]
-            }
+            component["evidence"] = {"occurrences": [{"location": loc} for loc in asset.locations[:20]]}
 
         components.append(component)
 

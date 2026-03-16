@@ -1,4 +1,5 @@
 """Rust language analyzer — loads rules from rust.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

@@ -41,11 +41,7 @@ def _collect_dep_files(context: ScanContext) -> list[Path]:
 
     dep_filenames = set(_DEP_FILES.keys())
     files: list[Path] = []
-    spec = (
-        pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns)
-        if context.exclude_patterns
-        else None
-    )
+    spec = pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns) if context.exclude_patterns else None
 
     for target in context.targets:
         if target.is_file():

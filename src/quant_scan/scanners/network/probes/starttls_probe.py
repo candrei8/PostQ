@@ -1,4 +1,5 @@
 """STARTTLS probe — upgrades plain connections to TLS and analyzes."""
+
 from __future__ import annotations
 
 import logging

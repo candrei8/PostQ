@@ -41,9 +41,7 @@ def render_sarif(result: ScanResult) -> str:
                 "id": finding.rule_id,
                 "name": finding.rule_id,
                 "shortDescription": {"text": finding.message},
-                "fullDescription": {
-                    "text": f"{finding.message}. {finding.recommendation}"
-                },
+                "fullDescription": {"text": f"{finding.message}. {finding.recommendation}"},
                 "help": {
                     "text": finding.recommendation,
                     "markdown": (
@@ -53,9 +51,7 @@ def render_sarif(result: ScanResult) -> str:
                     ),
                 },
                 "properties": {
-                    "security-severity": _SEVERITY_TO_SCORE.get(
-                        finding.severity, "5.0"
-                    ),
+                    "security-severity": _SEVERITY_TO_SCORE.get(finding.severity, "5.0"),
                     "tags": [
                         "security",
                         "cryptography",
@@ -97,9 +93,9 @@ def render_sarif(result: ScanResult) -> str:
 
         # Add code flow context if available
         if finding.location.line_content:
-            sarif_result["locations"][0]["physicalLocation"]["region"][
-                "snippet"
-            ] = {"text": finding.location.line_content}
+            sarif_result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
+                "text": finding.location.line_content
+            }
 
         results.append(sarif_result)
 

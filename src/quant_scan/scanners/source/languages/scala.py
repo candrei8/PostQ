@@ -1,4 +1,5 @@
 """Scala language analyzer — loads rules from scala.yml."""
+
 from __future__ import annotations
 
 from quant_scan.core.models import Finding

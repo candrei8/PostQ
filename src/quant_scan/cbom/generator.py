@@ -1,4 +1,5 @@
 """CBOM generator — creates Cryptographic Bill of Materials from scan results."""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -48,9 +49,7 @@ def generate_cbom(result: ScanResult) -> CryptoBOM:
 
         # Determine worst severity
         severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
-        worst_sev = min(
-            findings, key=lambda f: severity_order.get(f.severity.value, 4)
-        )
+        worst_sev = min(findings, key=lambda f: severity_order.get(f.severity.value, 4))
 
         components.append(
             CryptoAsset(

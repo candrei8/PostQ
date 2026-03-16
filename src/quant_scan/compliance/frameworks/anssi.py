@@ -2,6 +2,7 @@
 
 Maps findings to French National Cybersecurity Agency cryptographic recommendations.
 """
+
 from __future__ import annotations
 
 from quant_scan.compliance.mapper import ComplianceRef

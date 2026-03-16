@@ -1,19 +1,21 @@
 """Tests for advanced scoring (QVSS, crypto debt)."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from quant_scan.core.enums import AlgorithmFamily, QuantumRisk, Severity
 from quant_scan.core.models import Algorithm, FileLocation, Finding, ScanResult, ScanSummary
-from quant_scan.scoring.quantum_score import QVSSScore, compute_qvss
-from quant_scan.scoring.crypto_debt import CryptoDebt, compute_crypto_debt
+from quant_scan.scoring.crypto_debt import compute_crypto_debt
+from quant_scan.scoring.quantum_score import compute_qvss
 
 
 def _make_finding(family: AlgorithmFamily, risk: QuantumRisk, severity: Severity = Severity.HIGH) -> Finding:
     return Finding(
-        rule_id="TEST", severity=severity, quantum_risk=risk,
+        rule_id="TEST",
+        severity=severity,
+        quantum_risk=risk,
         algorithm=Algorithm(name=family.value, family=family, quantum_risk=risk),
-        location=FileLocation(file_path="test.py", line_number=1), message="Test",
+        location=FileLocation(file_path="test.py", line_number=1),
+        message="Test",
     )
 
 

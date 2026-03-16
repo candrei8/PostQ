@@ -1,4 +1,5 @@
 """Container scanner — detects crypto issues in Dockerfiles and K8s manifests."""
+
 from __future__ import annotations
 
 import logging

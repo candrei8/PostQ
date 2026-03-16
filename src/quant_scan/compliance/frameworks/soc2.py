@@ -2,6 +2,7 @@
 
 Maps findings to AICPA Trust Services Criteria for security.
 """
+
 from __future__ import annotations
 
 from quant_scan.compliance.mapper import ComplianceRef

@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from quant_scan.core.enums import QuantumRisk, Severity
-from quant_scan.core.models import Algorithm, FileLocation, Finding
+from quant_scan.core.models import FileLocation, Finding
 from quant_scan.rules.loader import load_algorithms
 
 # ---------------------------------------------------------------------------
@@ -41,10 +41,7 @@ _NODE_CRYPTO_LIBS: list[dict[str, Any]] = [
             "Node.js dependency 'node-forge' detected. Provides RSA, DES, and "
             "other quantum-vulnerable algorithms in pure JavaScript."
         ),
-        "recommendation": (
-            "Audit usage for RSA/DES operations. Migrate RSA to ML-DSA/ML-KEM "
-            "and DES to AES-256."
-        ),
+        "recommendation": ("Audit usage for RSA/DES operations. Migrate RSA to ML-DSA/ML-KEM and DES to AES-256."),
     },
     {
         "names": ["bcrypt", "bcryptjs"],
@@ -99,10 +96,7 @@ _NODE_CRYPTO_LIBS: list[dict[str, Any]] = [
         "severity": Severity.HIGH,
         "quantum_risk": QuantumRisk.VULNERABLE,
         "algorithm_key": "RSA-generic",
-        "message": (
-            "Node.js dependency 'node-rsa' detected. Pure RSA library — all "
-            "usage is quantum-vulnerable."
-        ),
+        "message": ("Node.js dependency 'node-rsa' detected. Pure RSA library — all usage is quantum-vulnerable."),
         "recommendation": (
             "Migrate all RSA operations to PQC algorithms. Replace RSA "
             "signatures with ML-DSA and RSA key exchange with ML-KEM."
@@ -151,8 +145,7 @@ def analyze_node_deps(file_path: str, content: str) -> list[Finding]:
         return []
 
     # Collect all dependencies from relevant sections
-    dep_sections = ["dependencies", "devDependencies", "peerDependencies",
-                    "optionalDependencies"]
+    dep_sections = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]
     all_deps: dict[str, str] = {}
     for section in dep_sections:
         section_deps = data.get(section)

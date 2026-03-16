@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from quant_scan.cicd.quality_gate import QualityGate, QualityGateResult
+from quant_scan.cicd.quality_gate import QualityGateResult
 from quant_scan.core.models import ScanResult
 
 
@@ -25,7 +25,6 @@ def format_pr_comment(
     # Header with badge
     if gate_result:
         badge = "PASSED" if gate_result.passed else "FAILED"
-        emoji = "white_check_mark" if gate_result.passed else "x"
         lines.append(f"## Quant-Scan PQC Assessment: {badge}")
     else:
         lines.append("## Quant-Scan PQC Assessment")

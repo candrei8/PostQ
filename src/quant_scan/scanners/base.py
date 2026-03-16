@@ -28,9 +28,7 @@ class BaseScanner(ABC):
 
         files: list[Path] = []
         spec = (
-            pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns)
-            if context.exclude_patterns
-            else None
+            pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns) if context.exclude_patterns else None
         )
 
         for target in context.targets:

@@ -1,10 +1,13 @@
 """Scan engine — orchestrates scanners, aggregates results."""
+
 from __future__ import annotations
 
 import time
 
+# Import scanner modules so their @register decorators execute
+import quant_scan.scanners.source.scanner  # noqa: F401
 from quant_scan.core.context import ScanContext
-from quant_scan.core.enums import QuantumRisk, Severity
+from quant_scan.core.enums import QuantumRisk
 from quant_scan.core.event_bus import EventBus
 from quant_scan.core.events import (
     FindingDetected,
@@ -25,9 +28,6 @@ from quant_scan.core.middleware import (
 from quant_scan.core.models import Finding, ScanResult, ScanSummary
 from quant_scan.scanners.base import BaseScanner
 from quant_scan.scanners.registry import get_all_scanners, get_scanner
-
-# Import scanner modules so their @register decorators execute
-import quant_scan.scanners.source.scanner  # noqa: F401
 
 # Try importing optional scanner modules
 for _mod in (
@@ -92,10 +92,12 @@ class ScanEngine:
         else:
             scanners = get_all_scanners()
 
-        self._event_bus.emit(ScanStarted(
-            targets=[str(t) for t in context.targets],
-            scanner_names=[s.name for s in scanners],
-        ))
+        self._event_bus.emit(
+            ScanStarted(
+                targets=[str(t) for t in context.targets],
+                scanner_names=[s.name for s in scanners],
+            )
+        )
 
         # Run scanners
         all_findings: list[Finding] = []
@@ -110,18 +112,22 @@ class ScanEngine:
                 all_findings.extend(findings)
                 scanner_finding_count = len(findings)
             except Exception as exc:
-                self._event_bus.emit(ScanError(
-                    error=str(exc),
-                    scanner_name=scanner.name,
-                ))
+                self._event_bus.emit(
+                    ScanError(
+                        error=str(exc),
+                        scanner_name=scanner.name,
+                    )
+                )
                 scanner_finding_count = 0
 
             scanner_elapsed = time.monotonic() - scanner_start
-            self._event_bus.emit(ScannerCompleted(
-                scanner_name=scanner.name,
-                finding_count=scanner_finding_count,
-                duration_seconds=round(scanner_elapsed, 3),
-            ))
+            self._event_bus.emit(
+                ScannerCompleted(
+                    scanner_name=scanner.name,
+                    finding_count=scanner_finding_count,
+                    duration_seconds=round(scanner_elapsed, 3),
+                )
+            )
 
         # Apply middleware chain
         for mw in self._middleware:
@@ -158,9 +164,7 @@ class ScanEngine:
 
         # PQC readiness: % of findings that are safe
         total = len(findings) if findings else 1
-        safe_count = sum(
-            1 for f in findings if f.quantum_risk == QuantumRisk.SAFE
-        )
+        safe_count = sum(1 for f in findings if f.quantum_risk == QuantumRisk.SAFE)
         pqc_pct = (safe_count / total) * 100 if findings else 100.0
 
         return ScanSummary(

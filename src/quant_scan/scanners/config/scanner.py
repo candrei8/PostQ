@@ -89,9 +89,7 @@ class ConfigScanner(BaseScanner):
     def _collect_config_files(self, context: ScanContext) -> list[Path]:
         """Walk targets and collect SSH and TLS config files."""
         spec = (
-            pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns)
-            if context.exclude_patterns
-            else None
+            pathspec.PathSpec.from_lines("gitwildmatch", context.exclude_patterns) if context.exclude_patterns else None
         )
 
         files: list[Path] = []
