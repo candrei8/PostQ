@@ -1,0 +1,56 @@
+# Quantum computing progress milestones.
+# Used for projecting timeline to cryptographically relevant quantum computer (CRQC).
+
+milestones:
+  - year: 2019
+    qubits: 53
+    source: "Google Sycamore"
+    type: "superconducting"
+
+  - year: 2021
+    qubits: 127
+    source: "IBM Eagle"
+    type: "superconducting"
+
+  - year: 2022
+    qubits: 433
+    source: "IBM Osprey"
+    type: "superconducting"
+
+  - year: 2023
+    qubits: 1121
+    source: "IBM Condor"
+    type: "superconducting"
+
+  - year: 2024
+    qubits: 1386
+    source: "Atom Computing"
+    type: "neutral atom"
+
+  - year: 2025
+    qubits: 4000
+    source: "IBM Flamingo (projected)"
+    type: "superconducting"
+
+  - year: 2026
+    qubits: 10000
+    source: "IBM Starling (projected)"
+    type: "superconducting"
+
+# Note: These are physical qubits. Logical qubits require error correction,
+# with typical overhead ratios of 1000:1 to 10000:1 depending on architecture.
+# A CRQC capable of running Shor's algorithm against RSA-2048 would need
+# approximately 4000 logical qubits, or roughly 4-40 million physical qubits.
+
+projections:
+  optimistic:
+    crqc_year: 2030
+    description: "Assumes rapid advances in error correction and qubit quality"
+
+  moderate:
+    crqc_year: 2035
+    description: "Follows current trajectory of quantum hardware development"
+
+  conservative:
+    crqc_year: 2040
+    description: "Assumes significant engineering challenges remain"

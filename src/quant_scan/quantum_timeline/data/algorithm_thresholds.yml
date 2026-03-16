@@ -1,0 +1,85 @@
+# Quantum computing requirements per algorithm family.
+# logical_qubits: estimated logical qubits needed to break the algorithm.
+# Sources: NIST, academic estimates (Gidney & Ekera 2021, etc.)
+
+thresholds:
+
+  RSA-1024:
+    logical_qubits: 1500
+    break_year_optimistic: 2028
+    break_year_moderate: 2032
+    break_year_conservative: 2038
+    attack: "Shor's algorithm"
+    confidence: high
+
+  RSA-2048:
+    logical_qubits: 4000
+    break_year_optimistic: 2030
+    break_year_moderate: 2035
+    break_year_conservative: 2040
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  RSA-4096:
+    logical_qubits: 8000
+    break_year_optimistic: 2033
+    break_year_moderate: 2038
+    break_year_conservative: 2045
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  ECC-256:
+    logical_qubits: 2500
+    break_year_optimistic: 2029
+    break_year_moderate: 2034
+    break_year_conservative: 2040
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  ECC-384:
+    logical_qubits: 3500
+    break_year_optimistic: 2030
+    break_year_moderate: 2035
+    break_year_conservative: 2042
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  DSA:
+    logical_qubits: 3000
+    break_year_optimistic: 2030
+    break_year_moderate: 2035
+    break_year_conservative: 2040
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  DH:
+    logical_qubits: 4000
+    break_year_optimistic: 2030
+    break_year_moderate: 2035
+    break_year_conservative: 2040
+    attack: "Shor's algorithm"
+    confidence: medium
+
+  AES-128:
+    logical_qubits: 2953
+    break_year_optimistic: 2040
+    break_year_moderate: 2050
+    break_year_conservative: 2060
+    attack: "Grover's algorithm (halves key strength to 64-bit)"
+    confidence: low
+
+  AES-256:
+    logical_qubits: 6681
+    break_year_optimistic: 2060
+    break_year_moderate: 2080
+    break_year_conservative: 2100
+    attack: "Grover's algorithm (halves key strength to 128-bit — still secure)"
+    confidence: low
+
+  SHA-256:
+    logical_qubits: 2953
+    break_year_optimistic: 2050
+    break_year_moderate: 2070
+    break_year_conservative: 2100
+    attack: "Grover's algorithm (preimage resistance halved)"
+    confidence: low

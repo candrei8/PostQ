@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+RUN openssl genrsa -out /app/key.pem 1024
+RUN openssl req -new -x509 -key /app/key.pem -out /app/cert.pem
+COPY certs/*.pem /app/certs/
+RUN pip install pycryptodome

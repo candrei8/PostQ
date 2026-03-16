@@ -1,0 +1,139 @@
+# Detection rules for C# source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── RSA ───────────────────────────────────────────────────────────────
+
+  - id: CS-RSA-PROVIDER
+    algorithm: RSA-generic
+    pattern: "new\\s+RSACryptoServiceProvider|RSACryptoServiceProvider\\("
+    message: "RSACryptoServiceProvider detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: CS-RSA-CREATE
+    algorithm: RSA-generic
+    pattern: "RSA\\.Create\\(\\)"
+    message: "RSA.Create() detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA or ML-KEM when .NET PQC support is available"
+
+  - id: CS-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "RSA\\.Create\\(\\s*1024\\s*\\)|RSACryptoServiceProvider\\(\\s*1024\\s*\\)"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: CS-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "RSA\\.Create\\(\\s*2048\\s*\\)|RSACryptoServiceProvider\\(\\s*2048\\s*\\)"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # ── DSA / EC ─────────────────────────────────────────────────────────────
+
+  - id: CS-DSA-PROVIDER
+    algorithm: DSA-generic
+    pattern: "new\\s+DSACryptoServiceProvider|DSACryptoServiceProvider\\(|DSA\\.Create\\("
+    message: "DSA usage detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: CS-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "ECDsa\\.Create|ECDsaCng\\(|new\\s+ECDsaCng"
+    message: "ECDSA usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  - id: CS-ECDH-USE
+    algorithm: ECDH-generic
+    pattern: "ECDiffieHellman\\.Create|ECDiffieHellmanCng\\(|new\\s+ECDiffieHellmanCng"
+    message: "ECDH key exchange detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # ── Hashes ──────────────────────────────────────────────────────────────
+
+  - id: CS-MD5-USE
+    algorithm: MD5
+    pattern: "MD5\\.Create\\(|MD5CryptoServiceProvider\\(|new\\s+MD5CryptoServiceProvider"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA256.Create() or SHA-3. Never use MD5 for security purposes"
+
+  - id: CS-SHA1-USE
+    algorithm: SHA-1
+    pattern: "SHA1\\.Create\\(|SHA1CryptoServiceProvider\\(|SHA1Managed\\(|new\\s+SHA1CryptoServiceProvider|new\\s+SHA1Managed"
+    message: "SHA-1 hash usage detected — broken"
+    recommendation: "Replace with SHA256.Create() or SHA-3-256"
+
+  # ── DES / 3DES ──────────────────────────────────────────────────────────
+
+  - id: CS-DES-USE
+    algorithm: DES
+    pattern: "DESCryptoServiceProvider\\(|new\\s+DESCryptoServiceProvider|DES\\.Create\\("
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with Aes.Create() with GCM mode"
+
+  - id: CS-3DES-USE
+    algorithm: 3DES
+    pattern: "TripleDESCryptoServiceProvider\\(|new\\s+TripleDESCryptoServiceProvider|TripleDES\\.Create\\("
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with Aes.Create() with 256-bit key in GCM mode"
+
+  # ── ECB mode ────────────────────────────────────────────────────────────
+
+  - id: CS-ECB-MODE
+    algorithm: AES-128
+    pattern: "CipherMode\\.ECB|Mode\\s*=\\s*CipherMode\\.ECB"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use CipherMode.CBC with HMAC or use AesGcm. ECB leaks plaintext patterns"
+
+  - id: CS-RIJNDAEL-USE
+    algorithm: AES-128
+    pattern: "RijndaelManaged\\(|new\\s+RijndaelManaged"
+    message: "RijndaelManaged detected — legacy class, may use insecure defaults"
+    recommendation: "Replace with Aes.Create() or AesGcm. RijndaelManaged is obsolete in modern .NET"
+    severity_override: medium
+
+  # ── RC4 / weak ciphers ──────────────────────────────────────────────────
+
+  - id: CS-RC2-USE
+    algorithm: RC4
+    pattern: "RC2CryptoServiceProvider\\(|new\\s+RC2CryptoServiceProvider"
+    message: "RC2 usage detected — broken cipher"
+    recommendation: "Replace with Aes.Create() with 256-bit key"
+
+  # ── Namespace import ────────────────────────────────────────────────────
+
+  - id: CS-CRYPTO-NAMESPACE
+    algorithm: RSA-generic
+    pattern: "using\\s+System\\.Security\\.Cryptography"
+    message: "System.Security.Cryptography namespace imported — review for quantum-vulnerable algorithms"
+    recommendation: "Audit all cryptographic operations in this file for quantum readiness"
+    severity_override: low
+    quantum_risk_override: unknown
+
+  # ── Signature ───────────────────────────────────────────────────────────
+
+  - id: CS-RSAPKCS1-SIGN
+    algorithm: RSA-generic
+    pattern: "RSAPKCS1SignatureFormatter|RSAPKCS1SignatureDeformatter|SignData\\(|VerifyData\\("
+    message: "RSA PKCS#1 signature operations detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  # ── X509 certificates ───────────────────────────────────────────────────
+
+  - id: CS-X509-RSA
+    algorithm: RSA-generic
+    pattern: "X509Certificate2\\(|new\\s+X509Certificate2|X509Store\\("
+    message: "X.509 certificate operations detected — likely using RSA/ECDSA"
+    recommendation: "Plan for PQC certificate migration. Monitor CA/Browser Forum PQC timelines"
+    severity_override: low
+    quantum_risk_override: unknown
+
+  # ── Weak random ─────────────────────────────────────────────────────────
+
+  - id: CS-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "new\\s+Random\\(|Random\\(\\)|System\\.Random"
+    message: "System.Random is not cryptographically secure"
+    recommendation: "Use RandomNumberGenerator.Create() or RandomNumberGenerator.GetBytes() for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown

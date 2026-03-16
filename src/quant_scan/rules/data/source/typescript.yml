@@ -1,0 +1,168 @@
+# Detection rules for TypeScript source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: TS-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "generateKeyPair\\(['\"]rsa|generateKeyPairSync\\(['\"]rsa|crypto\\.subtle\\.generateKey\\(\\{.*RSA"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: TS-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "import.*crypto.*RSA|require\\(['\"]crypto['\"]\\).*rsa"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: TS-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "modulusLength:\\s*1024"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: TS-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "modulusLength:\\s*2048"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA ----------------------------------------------------------
+
+  - id: TS-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "generateKeyPair\\(['\"]ec|crypto\\.subtle\\.generateKey\\(\\{.*ECDSA|crypto\\.subtle\\.generateKey\\(\\{.*ECDH"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: TS-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "createSign\\(.*ecdsa|ECDSA|sign\\(\\{.*algorithm.*ECDSA"
+    message: "ECDSA usage detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DH -------------------------------------------------------------------
+
+  - id: TS-DH-GENERATE
+    algorithm: DH-generic
+    pattern: "createDiffieHellman|createDiffieHellmanGroup|createECDH"
+    message: "Diffie-Hellman key exchange detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: TS-DES-USE
+    algorithm: DES
+    pattern: "createCipheriv\\(['\"]des|createCipher\\(['\"]des|DES|des-ede3"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: TS-3DES-USE
+    algorithm: 3DES
+    pattern: "createCipheriv\\(['\"]des-ede3|des-ede3-cbc"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: TS-MD5-USE
+    algorithm: MD5
+    pattern: "createHash\\(['\"]md5|CryptoJS\\.MD5|md5\\("
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: TS-SHA1-USE
+    algorithm: SHA-1
+    pattern: "createHash\\(['\"]sha1|CryptoJS\\.SHA1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: TS-RC4-USE
+    algorithm: RC4
+    pattern: "createCipheriv\\(['\"]rc4|CryptoJS\\.RC4"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: TS-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "createCipheriv\\(['\"]bf|CryptoJS\\.Blowfish"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: TS-ECB-MODE
+    algorithm: AES-128
+    pattern: "CryptoJS\\.mode\\.ECB|ECB|createCipheriv\\(.*ecb"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: TS-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "Math\\.random\\(\\)|Math\\.floor\\(Math\\.random"
+    message: "Non-cryptographic PRNG usage detected"
+    recommendation: "Use crypto.randomBytes() or crypto.getRandomValues() for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- WebCrypto API --------------------------------------------------------
+
+  - id: TS-WEBCRYPTO-RSA
+    algorithm: RSA-generic
+    pattern: "crypto\\.subtle\\.generateKey\\(\\{.*name:\\s*['\"]RSA"
+    message: "RSA usage via WebCrypto API detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: TS-WEBCRYPTO-ECDSA
+    algorithm: ECDSA-generic
+    pattern: "crypto\\.subtle\\.generateKey\\(\\{.*name:\\s*['\"]ECDSA"
+    message: "ECDSA usage via WebCrypto API detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  - id: TS-WEBCRYPTO-ECDH
+    algorithm: ECDH-generic
+    pattern: "crypto\\.subtle\\.generateKey\\(\\{.*name:\\s*['\"]ECDH"
+    message: "ECDH usage via WebCrypto API detected"
+    recommendation: "Migrate to ML-KEM for key encapsulation"
+
+  # -- JOSE / JWT -----------------------------------------------------------
+
+  - id: TS-JOSE-RSA
+    algorithm: RSA-generic
+    pattern: "jose.*RS256|jose.*RS384|jose.*RS512"
+    message: "RSA-based JWT signing detected via jose"
+    recommendation: "Plan migration to post-quantum JWT signing algorithms"
+
+  # -- node-rsa -------------------------------------------------------------
+
+  - id: TS-NODE-RSA
+    algorithm: RSA-generic
+    pattern: "require\\(['\"]node-rsa|import.*node-rsa"
+    message: "node-rsa library usage detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  # -- bcrypt ---------------------------------------------------------------
+
+  - id: TS-BCRYPT
+    algorithm: RSA-generic
+    pattern: "require\\(['\"]bcrypt|import.*bcrypt"
+    message: "bcrypt usage detected for password hashing"
+    recommendation: "bcrypt is quantum-resistant for password hashing; ensure adequate cost factor"
+
+  # -- AES-128 --------------------------------------------------------------
+
+  - id: TS-AES128
+    algorithm: AES-128
+    pattern: "createCipheriv\\(.*aes-128|aes-128"
+    message: "AES-128 usage detected — reduced quantum security margin"
+    recommendation: "Use AES-256 for full quantum resistance (Grover's algorithm halves effective key length)"

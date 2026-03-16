@@ -1,0 +1,37 @@
+# Azure DevOps pipeline template for quant-scan PQC assessment
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+
+  - script: pip install quant-scan
+    displayName: "Install quant-scan"
+
+  - script: |
+      quant-scan scan . \
+        --format sarif \
+        --output $(Build.ArtifactStagingDirectory)/results.sarif \
+        --severity info || true
+    displayName: "Run PQC Assessment"
+
+  - script: |
+      quant-scan scan . \
+        --format html \
+        --output $(Build.ArtifactStagingDirectory)/pqc-report.html || true
+    displayName: "Generate HTML Report"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+      ArtifactName: "quant-scan-results"
+    condition: always()

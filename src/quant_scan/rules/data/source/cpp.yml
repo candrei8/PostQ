@@ -1,0 +1,136 @@
+# Detection rules for C/C++ source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── OpenSSL RSA ──────────────────────────────────────────────────────────
+
+  - id: CPP-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "RSA_generate_key|RSA_generate_key_ex"
+    message: "OpenSSL RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: CPP-EVP-RSA
+    algorithm: RSA-generic
+    pattern: "EVP_PKEY_RSA|EVP_PKEY_CTX_set_rsa_keygen_bits"
+    message: "OpenSSL EVP RSA usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA or ML-KEM via OpenSSL 3.x OQS provider"
+
+  # ── OpenSSL DSA / EC / DH ───────────────────────────────────────────────
+
+  - id: CPP-EVP-DSA
+    algorithm: DSA-generic
+    pattern: "EVP_PKEY_DSA|DSA_generate_parameters|DSA_generate_key"
+    message: "OpenSSL DSA usage detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: CPP-EVP-EC
+    algorithm: ECC-generic
+    pattern: "EVP_PKEY_EC|EC_KEY_generate_key|EC_KEY_new_by_curve_name"
+    message: "OpenSSL EC key usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: CPP-DH-USE
+    algorithm: DH-generic
+    pattern: "DH_generate_parameters|DH_generate_key|EVP_PKEY_DH"
+    message: "OpenSSL Diffie-Hellman usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # ── OpenSSL DES ──────────────────────────────────────────────────────────
+
+  - id: CPP-DES-EVP
+    algorithm: DES
+    pattern: "EVP_des_cbc|EVP_des_ecb|EVP_des_cfb|EVP_des_ofb|EVP_des_ede3"
+    message: "OpenSSL DES/3DES cipher detected — broken"
+    recommendation: "Replace with EVP_aes_256_gcm()"
+
+  - id: CPP-DES-DIRECT
+    algorithm: DES
+    pattern: "DES_set_key|DES_ecb_encrypt|DES_cbc_encrypt|DES_ncbc_encrypt"
+    message: "OpenSSL DES direct API usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  # ── OpenSSL hashes ──────────────────────────────────────────────────────
+
+  - id: CPP-MD5-EVP
+    algorithm: MD5
+    pattern: "EVP_md5\\(|MD5_Init|MD5_Update|MD5_Final|MD5\\("
+    message: "OpenSSL MD5 usage detected — broken hash"
+    recommendation: "Replace with EVP_sha256() or SHA-3. Never use MD5 for security purposes"
+
+  - id: CPP-SHA1-EVP
+    algorithm: SHA-1
+    pattern: "EVP_sha1\\(|SHA1_Init|SHA1_Update|SHA1_Final|SHA1\\("
+    message: "OpenSSL SHA-1 usage detected — broken hash"
+    recommendation: "Replace with EVP_sha256() or SHA-3-256"
+
+  # ── OpenSSL RC4 ──────────────────────────────────────────────────────────
+
+  - id: CPP-RC4-USE
+    algorithm: RC4
+    pattern: "EVP_rc4\\(|RC4_set_key|RC4\\("
+    message: "OpenSSL RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # ── mbedTLS ──────────────────────────────────────────────────────────────
+
+  - id: CPP-MBED-MD5
+    algorithm: MD5
+    pattern: "mbedtls_md5_init|mbedtls_md5_starts|mbedtls_md5_update|mbedtls_md5_finish|mbedtls_md5\\("
+    message: "mbedTLS MD5 usage detected — broken hash"
+    recommendation: "Replace with mbedtls_sha256 or SHA-3"
+
+  - id: CPP-MBED-SHA1
+    algorithm: SHA-1
+    pattern: "mbedtls_sha1_init|mbedtls_sha1_starts|mbedtls_sha1_update|mbedtls_sha1_finish"
+    message: "mbedTLS SHA-1 usage detected — broken hash"
+    recommendation: "Replace with mbedtls_sha256 or SHA-3-256"
+
+  - id: CPP-MBED-DES
+    algorithm: DES
+    pattern: "mbedtls_des_init|mbedtls_des_setkey|mbedtls_des3_init|mbedtls_des_crypt"
+    message: "mbedTLS DES/3DES usage detected — broken cipher"
+    recommendation: "Replace with mbedtls_aes in GCM mode"
+
+  - id: CPP-MBED-RSA
+    algorithm: RSA-generic
+    pattern: "mbedtls_rsa_init|mbedtls_rsa_gen_key|mbedtls_rsa_pkcs1_encrypt"
+    message: "mbedTLS RSA usage detected — quantum vulnerable"
+    recommendation: "Migrate to PQC algorithms when mbedTLS adds support, or use liboqs"
+
+  # ── Windows CryptoAPI ───────────────────────────────────────────────────
+
+  - id: CPP-WINCRYPT-MD5
+    algorithm: MD5
+    pattern: "CALG_MD5|CryptCreateHash\\([^)]*CALG_MD5"
+    message: "Windows CryptoAPI MD5 detected — broken hash"
+    recommendation: "Replace with CALG_SHA_256 or use BCrypt API with BCRYPT_SHA256_ALGORITHM"
+
+  - id: CPP-WINCRYPT-SHA1
+    algorithm: SHA-1
+    pattern: "CALG_SHA\\b|CALG_SHA1|CryptCreateHash\\([^)]*CALG_SHA\\b"
+    message: "Windows CryptoAPI SHA-1 detected — broken hash"
+    recommendation: "Replace with CALG_SHA_256 or use BCrypt API"
+
+  - id: CPP-WINCRYPT-DES
+    algorithm: DES
+    pattern: "CALG_DES|CALG_3DES|CryptCreateHash\\([^)]*CALG_DES"
+    message: "Windows CryptoAPI DES/3DES detected — broken cipher"
+    recommendation: "Replace with CALG_AES_256 or use BCrypt API with BCRYPT_AES_ALGORITHM"
+
+  - id: CPP-WINCRYPT-RC4
+    algorithm: RC4
+    pattern: "CALG_RC4"
+    message: "Windows CryptoAPI RC4 detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM via BCrypt API"
+
+  # ── Weak random ─────────────────────────────────────────────────────────
+
+  - id: CPP-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "\\brand\\(\\)|\\bsrand\\(|std::rand\\(\\)|std::default_random_engine"
+    message: "Non-cryptographic PRNG used — insecure for key generation"
+    recommendation: "Use platform-specific CSPRNG (e.g., RAND_bytes on OpenSSL, BCryptGenRandom on Windows)"
+    severity_override: medium
+    quantum_risk_override: unknown

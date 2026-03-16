@@ -1,0 +1,176 @@
+# Detection rules for Rust source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: RS-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "RsaPrivateKey::new|rsa::RsaPrivateKey|RSA_generate_key"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: RS-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "use\\s+rsa::|extern\\s+crate\\s+rsa"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: RS-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "bits:\\s*1024|key_size.*1024"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: RS-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "bits:\\s*2048|key_size.*2048"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA / ECDH --------------------------------------------------
+
+  - id: RS-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "EphemeralSecret::random|SecretKey::random|p256::SecretKey|p384::SecretKey"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: RS-ECC-IMPORT
+    algorithm: ECC-generic
+    pattern: "use\\s+p256::|use\\s+p384::|use\\s+elliptic_curve::"
+    message: "ECC library import detected"
+    recommendation: "Plan migration to ML-DSA (signatures) or ML-KEM (key exchange)"
+
+  - id: RS-ECDSA-IMPORT
+    algorithm: ECDSA-generic
+    pattern: "use\\s+ecdsa::|ecdsa::SigningKey"
+    message: "ECDSA library import detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DSA / DH -------------------------------------------------------------
+
+  - id: RS-DSA-USE
+    algorithm: DSA-generic
+    pattern: "dsa::|DSA"
+    message: "DSA usage detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: RS-DH-USE
+    algorithm: DH-generic
+    pattern: "diffie_hellman|DiffieHellman|dh::"
+    message: "Diffie-Hellman usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: RS-DES-USE
+    algorithm: DES
+    pattern: "des::|Des::new|DesEde3|TripleDes"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: RS-3DES-USE
+    algorithm: 3DES
+    pattern: "des::TdesEde3|DesEde3Cbc"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: RS-MD5-USE
+    algorithm: MD5
+    pattern: "md5::|Md5::new|use\\s+md\\-5|md5::compute"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: RS-SHA1-USE
+    algorithm: SHA-1
+    pattern: "sha1::|Sha1::new|use\\s+sha\\-1|sha1::Sha1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: RS-RC4-USE
+    algorithm: RC4
+    pattern: "rc4::|Rc4::new"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: RS-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "blowfish::|Blowfish::new"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: RS-ECB-MODE
+    algorithm: AES-128
+    pattern: "Ecb::|ecb::|BlockMode.*ecb"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: RS-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "rand::thread_rng|thread_rng\\(\\)|StdRng::from_seed"
+    message: "Non-cryptographic PRNG usage detected — may be insecure for key generation"
+    recommendation: "Use OsRng for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- ring library ---------------------------------------------------------
+
+  - id: RS-RING-RSA
+    algorithm: RSA-generic
+    pattern: "ring::signature::RSA|ring::rsa"
+    message: "RSA usage via ring library detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: RS-RING-ECDSA
+    algorithm: ECDSA-generic
+    pattern: "ring::signature::ECDSA"
+    message: "ECDSA usage via ring library detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- OpenSSL bindings -----------------------------------------------------
+
+  - id: RS-OPENSSL-RSA
+    algorithm: RSA-generic
+    pattern: "openssl::rsa::|openssl::pkey::PKey"
+    message: "RSA usage via openssl crate detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: RS-OPENSSL-DES
+    algorithm: DES
+    pattern: "openssl::symm::Cipher::des"
+    message: "DES usage via openssl crate detected"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: RS-OPENSSL-MD5
+    algorithm: MD5
+    pattern: "openssl::hash::MessageDigest::md5"
+    message: "MD5 usage via openssl crate detected"
+    recommendation: "Replace with SHA-256 or SHA-3"
+
+  - id: RS-OPENSSL-SHA1
+    algorithm: SHA-1
+    pattern: "openssl::hash::MessageDigest::sha1"
+    message: "SHA-1 usage via openssl crate detected"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- rustls ---------------------------------------------------------------
+
+  - id: RS-RUSTLS-WEAK
+    algorithm: RSA-generic
+    pattern: "rustls::cipher_suite.*TLS.*RSA|CipherSuite.*RSA"
+    message: "Weak TLS cipher suite with RSA detected in rustls"
+    recommendation: "Use ECDHE-based cipher suites and plan PQC migration"

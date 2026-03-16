@@ -1,0 +1,153 @@
+# Detection rules for Scala source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: SC-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"RSA\"\\)"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: SC-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "import\\s+java\\.security\\..*RSA|javax\\.crypto.*RSA"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: SC-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "initialize\\(1024\\)|RSAKeyGenParameterSpec\\(1024"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: SC-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "initialize\\(2048\\)|RSAKeyGenParameterSpec\\(2048"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA ----------------------------------------------------------
+
+  - id: SC-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"EC\"\\)"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: SC-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "Signature\\.getInstance\\(\".*ECDSA"
+    message: "ECDSA usage detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DSA / DH -------------------------------------------------------------
+
+  - id: SC-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"DSA\"\\)"
+    message: "DSA key generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: SC-DH-GENERATE
+    algorithm: DH-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"DH\"\\)"
+    message: "Diffie-Hellman key generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: SC-DES-USE
+    algorithm: DES
+    pattern: "Cipher\\.getInstance\\(\"DES|DESKeySpec"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: SC-3DES-USE
+    algorithm: 3DES
+    pattern: "Cipher\\.getInstance\\(\"DESede|DESedeKeySpec"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: SC-MD5-USE
+    algorithm: MD5
+    pattern: "MessageDigest\\.getInstance\\(\"MD5\"\\)|DigestUtils\\.md5"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: SC-SHA1-USE
+    algorithm: SHA-1
+    pattern: "MessageDigest\\.getInstance\\(\"SHA-1\"\\)|DigestUtils\\.sha1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: SC-RC4-USE
+    algorithm: RC4
+    pattern: "Cipher\\.getInstance\\(\"RC4\"\\)|Cipher\\.getInstance\\(\"ARCFOUR\"\\)"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: SC-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "Cipher\\.getInstance\\(\"Blowfish\"\\)"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: SC-ECB-MODE
+    algorithm: AES-128
+    pattern: "Cipher\\.getInstance\\(\"[^\"]*ECB|/ECB/"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: SC-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "scala\\.util\\.Random|new\\s+Random\\(\\)"
+    message: "Non-cryptographic PRNG usage detected"
+    recommendation: "Use java.security.SecureRandom for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- Akka SSL -------------------------------------------------------------
+
+  - id: SC-AKKA-SSL
+    algorithm: RSA-generic
+    pattern: "SSLContext\\.getInstance|ConnectionContext\\.https"
+    message: "SSL/TLS context usage detected in Scala/Akka"
+    recommendation: "Audit TLS configuration; use TLS 1.3 and plan for post-quantum TLS"
+    severity_override: medium
+
+  # -- BouncyCastle ---------------------------------------------------------
+
+  - id: SC-BOUNCY-RSA
+    algorithm: RSA-generic
+    pattern: "BouncyCastle.*RSA|BCRSAPrivateKey"
+    message: "RSA usage via BouncyCastle detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: SC-BOUNCY-DES
+    algorithm: DES
+    pattern: "BouncyCastle.*DES|DESedeEngine"
+    message: "DES usage via BouncyCastle detected"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- AES-128 --------------------------------------------------------------
+
+  - id: SC-AES128
+    algorithm: AES-128
+    pattern: "AES.*128|SecretKeySpec.*16\\s*\\)"
+    message: "AES-128 usage detected — reduced quantum security margin"
+    recommendation: "Use AES-256 for full quantum resistance (Grover's algorithm halves effective key length)"

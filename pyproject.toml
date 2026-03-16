@@ -4,21 +4,27 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quant-scan"
-version = "0.1.0"
-description = "Post-Quantum Cryptography Scanner — Detect quantum-vulnerable algorithms in code, certificates, configs, and dependencies"
-readme = "PRD.md"
+version = "0.2.0"
+description = "Post-Quantum Cryptography Scanner — The most powerful PQC vulnerability scanner. Detect quantum-vulnerable algorithms in code, certificates, configs, dependencies, infrastructure, and binaries."
+readme = "README.md"
 requires-python = ">=3.11"
-license = "LicenseRef-Proprietary"
+license = "Apache-2.0"
 authors = [
     { name = "EYD Company", email = "info@eydcompany.com" },
 ]
-keywords = ["pqc", "post-quantum", "cryptography", "scanner", "security", "audit"]
+keywords = ["pqc", "post-quantum", "cryptography", "scanner", "security", "audit", "compliance", "NIST", "CBOM"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
     "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Quality Assurance",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
 ]
 dependencies = [
     "typer>=0.9.0",
@@ -34,10 +40,65 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "ruff>=0.4.0",
 ]
+pdf = [
+    "weasyprint>=60.0",
+    "matplotlib>=3.8.0",
+]
+binary = [
+    "pyelftools>=0.29",
+    "pefile>=2023.2.7",
+]
+network = [
+    "dnspython>=2.4.0",
+]
+cloud-aws = [
+    "boto3>=1.28.0",
+]
+cloud-azure = [
+    "azure-identity>=1.14.0",
+    "azure-mgmt-keyvault>=10.0.0",
+]
+cloud-gcp = [
+    "google-cloud-kms>=2.19.0",
+]
+cloud = [
+    "quant-scan[cloud-aws,cloud-azure,cloud-gcp]",
+]
+server = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.13.0",
+]
+analysis = [
+    "tree-sitter>=0.22",
+]
+all = [
+    "quant-scan[pdf,binary,network,cloud,server,analysis]",
+]
+
+[project.urls]
+Homepage = "https://github.com/eyd-company/quant-scan"
+Documentation = "https://quant-scan.readthedocs.io"
+Repository = "https://github.com/eyd-company/quant-scan"
+Issues = "https://github.com/eyd-company/quant-scan/issues"
+Changelog = "https://github.com/eyd-company/quant-scan/releases"
 
 [project.scripts]
 quant-scan = "quant_scan.cli.app:app"
+
+[project.entry-points."quant_scan.scanners"]
+source = "quant_scan.scanners.source.scanner:SourceCodeScanner"
+certificate = "quant_scan.scanners.certificate.scanner:CertificateScanner"
+config = "quant_scan.scanners.config.scanner:ConfigScanner"
+dependency = "quant_scan.scanners.dependency.scanner:DependencyScanner"
+secrets = "quant_scan.scanners.secrets.scanner:SecretScanner"
+network = "quant_scan.scanners.network.scanner:NetworkScanner"
+iac = "quant_scan.scanners.iac.scanner:IacScanner"
+container = "quant_scan.scanners.container.scanner:ContainerScanner"
+binary = "quant_scan.scanners.binary.scanner:BinaryScanner"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quant_scan"]
@@ -45,3 +106,10 @@ packages = ["src/quant_scan"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]

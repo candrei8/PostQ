@@ -1,0 +1,20 @@
+# Vulnerable SSH configuration
+# This should trigger multiple findings
+
+Port 22
+Protocol 2
+
+# Weak ciphers
+Ciphers aes128-cbc,3des-cbc,blowfish-cbc,aes256-ctr
+
+# Weak MACs
+MACs hmac-md5,hmac-sha1,hmac-sha2-256
+
+# Weak key exchange
+KexAlgorithms diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,ecdh-sha2-nistp256
+
+# Weak host keys
+HostKeyAlgorithms ssh-rsa,ssh-dss,ecdsa-sha2-nistp256
+
+PermitRootLogin no
+PasswordAuthentication yes

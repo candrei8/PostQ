@@ -1,0 +1,142 @@
+# Detection rules for JavaScript / TypeScript source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── Hashes ──────────────────────────────────────────────────────────────
+
+  - id: JS-MD5-USE
+    algorithm: MD5
+    pattern: "crypto\\.createHash\\(\\s*['\"]md5['\"]|createHash\\(\\s*['\"]md5['\"]"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  - id: JS-SHA1-USE
+    algorithm: SHA-1
+    pattern: "crypto\\.createHash\\(\\s*['\"]sha1['\"]|createHash\\(\\s*['\"]sha1['\"]"
+    message: "SHA-1 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # ── Symmetric ciphers ───────────────────────────────────────────────────
+
+  - id: JS-DES-USE
+    algorithm: DES
+    pattern: "createCipher(?:iv)?\\(\\s*['\"]des['\"]|createCipher(?:iv)?\\(\\s*['\"]des-ede"
+    message: "DES cipher usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: JS-3DES-USE
+    algorithm: 3DES
+    pattern: "createCipher(?:iv)?\\(\\s*['\"]des-ede3|createCipher(?:iv)?\\(\\s*['\"]des3"
+    message: "3DES cipher usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: JS-RC4-USE
+    algorithm: RC4
+    pattern: "createCipher(?:iv)?\\(\\s*['\"]rc4['\"]"
+    message: "RC4 cipher usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  - id: JS-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "createCipher(?:iv)?\\(\\s*['\"]bf['\"]|createCipher(?:iv)?\\(\\s*['\"]blowfish['\"]|createCipher(?:iv)?\\(\\s*['\"]bf-cbc['\"]"
+    message: "Blowfish cipher usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # ── RSA / EC / DH key generation ────────────────────────────────────────
+
+  - id: JS-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "generateKeyPair(?:Sync)?\\(\\s*['\"]rsa['\"]"
+    message: "RSA key pair generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: JS-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "generateKeyPair(?:Sync)?\\(\\s*['\"]dsa['\"]"
+    message: "DSA key pair generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: JS-EC-GENERATE
+    algorithm: ECC-generic
+    pattern: "generateKeyPair(?:Sync)?\\(\\s*['\"]ec['\"]"
+    message: "Elliptic curve key pair generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: JS-DH-USE
+    algorithm: DH-generic
+    pattern: "crypto\\.createDiffieHellman|crypto\\.createDiffieHellmanGroup|crypto\\.createECDH"
+    message: "Diffie-Hellman key exchange detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # ── CryptoJS library ────────────────────────────────────────────────────
+
+  - id: JS-CRYPTOJS-MD5
+    algorithm: MD5
+    pattern: "CryptoJS\\.MD5|CryptoJS\\.HmacMD5"
+    message: "CryptoJS MD5 usage detected — broken"
+    recommendation: "Replace with CryptoJS.SHA256 or use native crypto.createHash('sha256')"
+
+  - id: JS-CRYPTOJS-SHA1
+    algorithm: SHA-1
+    pattern: "CryptoJS\\.SHA1|CryptoJS\\.HmacSHA1"
+    message: "CryptoJS SHA-1 usage detected — broken"
+    recommendation: "Replace with CryptoJS.SHA256 or SHA-3"
+
+  - id: JS-CRYPTOJS-DES
+    algorithm: DES
+    pattern: "CryptoJS\\.DES\\.encrypt|CryptoJS\\.DES\\.decrypt|CryptoJS\\.TripleDES"
+    message: "CryptoJS DES/3DES usage detected — broken cipher"
+    recommendation: "Replace with CryptoJS.AES with GCM mode, or use native crypto"
+
+  - id: JS-CRYPTOJS-ECB
+    algorithm: AES-128
+    pattern: "CryptoJS\\.mode\\.ECB|mode:\\s*CryptoJS\\.mode\\.ECB"
+    message: "CryptoJS ECB mode detected — insecure block cipher mode"
+    recommendation: "Use CBC or CTR mode. ECB leaks plaintext patterns"
+
+  # ── node-forge ──────────────────────────────────────────────────────────
+
+  - id: JS-FORGE-RSA
+    algorithm: RSA-generic
+    pattern: "forge\\.pki\\.rsa\\.generateKeyPair|forge\\.rsa\\.generateKeyPair|forge\\.pki\\.rsa\\.setPublicKey"
+    message: "node-forge RSA usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) or ML-KEM (FIPS 203)"
+
+  # ── JWT / JOSE ──────────────────────────────────────────────────────────
+
+  - id: JS-JWT-RSA
+    algorithm: RSA-generic
+    pattern: "algorithm:\\s*['\"]RS(256|384|512)['\"]|alg:\\s*['\"]RS(256|384|512)['\"]"
+    message: "JWT with RSA signature algorithm detected — quantum vulnerable"
+    recommendation: "Plan migration to PQC-based JWT signing when library support is available"
+
+  - id: JS-JWT-EC
+    algorithm: ECDSA-generic
+    pattern: "algorithm:\\s*['\"]ES(256|384|512)['\"]|alg:\\s*['\"]ES(256|384|512)['\"]"
+    message: "JWT with ECDSA signature algorithm detected — quantum vulnerable"
+    recommendation: "Plan migration to PQC-based JWT signing when library support is available"
+
+  # ── WebCrypto ───────────────────────────────────────────────────────────
+
+  - id: JS-WEBCRYPTO-RSA
+    algorithm: RSA-generic
+    pattern: "subtle\\.generateKey\\([^)]*RSASSA-PKCS1|subtle\\.generateKey\\([^)]*RSA-PSS|subtle\\.generateKey\\([^)]*RSA-OAEP"
+    message: "WebCrypto RSA key generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key encapsulation"
+
+  - id: JS-WEBCRYPTO-EC
+    algorithm: ECDSA-generic
+    pattern: "subtle\\.generateKey\\([^)]*ECDSA|subtle\\.generateKey\\([^)]*ECDH"
+    message: "WebCrypto ECDSA/ECDH key generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  # ── Weak random ─────────────────────────────────────────────────────────
+
+  - id: JS-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "Math\\.random\\(\\)"
+    message: "Math.random() is not cryptographically secure"
+    recommendation: "Use crypto.randomBytes() or crypto.getRandomValues() for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown

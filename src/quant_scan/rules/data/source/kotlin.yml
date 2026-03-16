@@ -1,0 +1,168 @@
+# Detection rules for Kotlin source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: KT-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"RSA\"\\)|RSAKeyGenParameterSpec"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: KT-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "import\\s+java\\.security\\..*RSA|javax\\.crypto.*RSA"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: KT-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "RSAKeyGenParameterSpec\\(1024|initialize\\(1024\\)"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: KT-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "RSAKeyGenParameterSpec\\(2048|initialize\\(2048\\)"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA ----------------------------------------------------------
+
+  - id: KT-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"EC\"\\)|ECGenParameterSpec"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: KT-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "Signature\\.getInstance\\(\".*ECDSA|ECDSASign"
+    message: "ECDSA usage detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DSA / DH -------------------------------------------------------------
+
+  - id: KT-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"DSA\"\\)"
+    message: "DSA key generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: KT-DH-GENERATE
+    algorithm: DH-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\"DH\"\\)|DHParameterSpec"
+    message: "Diffie-Hellman key generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: KT-DES-USE
+    algorithm: DES
+    pattern: "Cipher\\.getInstance\\(\"DES|DESKeySpec|DESedeKeySpec"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: KT-3DES-USE
+    algorithm: 3DES
+    pattern: "Cipher\\.getInstance\\(\"DESede|DESedeKeySpec"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: KT-MD5-USE
+    algorithm: MD5
+    pattern: "MessageDigest\\.getInstance\\(\"MD5\"\\)|DigestUtils\\.md5"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: KT-SHA1-USE
+    algorithm: SHA-1
+    pattern: "MessageDigest\\.getInstance\\(\"SHA-1\"\\)|DigestUtils\\.sha1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: KT-RC4-USE
+    algorithm: RC4
+    pattern: "Cipher\\.getInstance\\(\"RC4\"\\)|Cipher\\.getInstance\\(\"ARCFOUR\"\\)"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: KT-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "Cipher\\.getInstance\\(\"Blowfish\"\\)"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: KT-ECB-MODE
+    algorithm: AES-128
+    pattern: "Cipher\\.getInstance\\(\"[^\"]*ECB|/ECB/"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: KT-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "java\\.util\\.Random\\(\\)|kotlin\\.random\\.Random(?!\\.Default\\.nextBytes)"
+    message: "Non-cryptographic PRNG usage detected"
+    recommendation: "Use java.security.SecureRandom for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- BouncyCastle ---------------------------------------------------------
+
+  - id: KT-BOUNCY-RSA
+    algorithm: RSA-generic
+    pattern: "BouncyCastle.*RSA|BCRSAPrivateKey"
+    message: "RSA usage via BouncyCastle detected"
+    recommendation: "Migrate to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: KT-BOUNCY-DES
+    algorithm: DES
+    pattern: "BouncyCastle.*DES|DESedeEngine"
+    message: "DES usage via BouncyCastle detected"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: KT-BOUNCY-MD5
+    algorithm: MD5
+    pattern: "BouncyCastle.*MD5|MD5Digest"
+    message: "MD5 usage via BouncyCastle detected"
+    recommendation: "Replace with SHA-256 or SHA-3"
+
+  # -- AES-128 --------------------------------------------------------------
+
+  - id: KT-AES128-USE
+    algorithm: AES-128
+    pattern: "AES.*128|SecretKeySpec.*16\\s*\\)"
+    message: "AES-128 usage detected — reduced quantum security margin"
+    recommendation: "Use AES-256 for full quantum resistance (Grover's algorithm halves effective key length)"
+
+  # -- SSL/TLS --------------------------------------------------------------
+
+  - id: KT-SSL-WEAK
+    algorithm: RSA-generic
+    pattern: "SSLContext\\.getInstance\\(\"TLS\"|SSLContext\\.getInstance\\(\"SSL\"\\)"
+    message: "Potentially weak SSL/TLS context detected"
+    recommendation: "Use TLS 1.3 and plan for post-quantum TLS"
+    severity_override: medium
+
+  # -- Insecure trust manager -----------------------------------------------
+
+  - id: KT-INSECURE-TRUST
+    algorithm: RSA-generic
+    pattern: "X509TrustManager.*checkServerTrusted.*\\{\\s*\\}|TrustAllCerts"
+    message: "Insecure TrustManager detected — certificate validation disabled"
+    recommendation: "Implement proper certificate validation; never trust all certificates in production"
+    severity_override: high

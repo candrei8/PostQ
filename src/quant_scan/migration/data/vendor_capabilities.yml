@@ -1,0 +1,60 @@
+# Vendor capability matrix for PQC migration recommendations.
+
+vendors:
+  PQShield:
+    description: "Hardware-focused PQC solutions provider"
+    strengths:
+      - "Hardware Security Modules (HSM) with PQC support"
+      - "Embedded systems and IoT PQC"
+      - "Low-latency cryptographic implementations"
+      - "FIPS 140-3 certification path"
+      - "Side-channel resistant implementations"
+    best_for:
+      - "HSM upgrades"
+      - "Embedded/IoT devices"
+      - "Low-latency applications"
+      - "Government/defense"
+    products:
+      - "PQPlatform — SoC-level PQC"
+      - "PQCryptoLib — software library"
+    certifications:
+      - "FIPS 140-3 (in progress)"
+      - "Common Criteria"
+
+  QuSecure:
+    description: "Network-focused PQC orchestration platform"
+    strengths:
+      - "Network/TLS infrastructure migration"
+      - "Orchestration platform for enterprise-wide PQC"
+      - "Hybrid key management (classical + PQC)"
+      - "Crypto-agile architecture"
+      - "Cloud-native deployment"
+    best_for:
+      - "TLS/network infrastructure"
+      - "Enterprise-wide orchestration"
+      - "Hybrid transition management"
+      - "Cloud environments"
+    products:
+      - "QuProtect — end-to-end PQC platform"
+      - "QuEverywhere — client-side PQC"
+
+  OpenSource:
+    description: "Open-source PQC implementations"
+    strengths:
+      - "Free and transparent"
+      - "Academic backing"
+      - "Community support"
+      - "Reference implementations"
+    best_for:
+      - "Development and testing"
+      - "Non-critical systems"
+      - "Budget-constrained deployments"
+      - "Research and experimentation"
+    products:
+      - "liboqs (Open Quantum Safe)"
+      - "oqs-provider (OpenSSL integration)"
+      - "PQClean — portable C implementations"
+    limitations:
+      - "No enterprise support"
+      - "No FIPS certification"
+      - "May lack production hardening"

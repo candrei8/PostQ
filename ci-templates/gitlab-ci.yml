@@ -1,0 +1,19 @@
+# GitLab CI template for quant-scan PQC assessment
+# Add this to your .gitlab-ci.yml
+
+quant-scan:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - pip install quant-scan
+  script:
+    - quant-scan scan . --format json --output quant-scan-report.json --severity info
+    - quant-scan scan . --format html --output quant-scan-report.html
+  artifacts:
+    reports:
+      codequality: quant-scan-report.json
+    paths:
+      - quant-scan-report.html
+      - quant-scan-report.json
+    when: always
+  allow_failure: true

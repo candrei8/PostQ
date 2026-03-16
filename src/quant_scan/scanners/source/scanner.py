@@ -14,9 +14,9 @@ _EXT_TO_LANG: dict[str, str] = {
     ".py": "python",
     ".java": "java",
     ".js": "javascript",
-    ".ts": "javascript",
     ".jsx": "javascript",
-    ".tsx": "javascript",
+    ".ts": "typescript",
+    ".tsx": "typescript",
     ".go": "golang",
     ".c": "cpp",
     ".cpp": "cpp",
@@ -24,6 +24,15 @@ _EXT_TO_LANG: dict[str, str] = {
     ".h": "cpp",
     ".hpp": "cpp",
     ".cs": "csharp",
+    ".rs": "rust",
+    ".swift": "swift",
+    ".kt": "kotlin",
+    ".kts": "kotlin",
+    ".php": "php",
+    ".rb": "ruby",
+    ".scala": "scala",
+    ".sc": "scala",
+    ".dart": "dart",
 }
 
 

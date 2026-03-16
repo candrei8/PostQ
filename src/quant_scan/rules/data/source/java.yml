@@ -1,0 +1,145 @@
+# Detection rules for Java source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── RSA ───────────────────────────────────────────────────────────────
+
+  - id: JAVA-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\\s*\"RSA\""
+    message: "RSA key pair generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: JAVA-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "\\.initialize\\(\\s*1024"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: JAVA-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "\\.initialize\\(\\s*2048"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  - id: JAVA-RSA-KEYSIZE-4096
+    algorithm: RSA-4096
+    pattern: "\\.initialize\\(\\s*4096"
+    message: "RSA 4096-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-87. RSA-4096 offers no protection against quantum attacks"
+
+  # ── DSA / EC / DH ──────────────────────────────────────────────────────
+
+  - id: JAVA-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\\s*\"DSA\""
+    message: "DSA key pair generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: JAVA-EC-GENERATE
+    algorithm: ECC-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\\s*\"EC\"|KeyPairGenerator\\.getInstance\\(\\s*\"ECDSA\""
+    message: "Elliptic curve key pair generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: JAVA-DH-GENERATE
+    algorithm: DH-generic
+    pattern: "KeyPairGenerator\\.getInstance\\(\\s*\"DH\"|KeyPairGenerator\\.getInstance\\(\\s*\"DiffieHellman\""
+    message: "Diffie-Hellman key pair generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # ── Symmetric ciphers ───────────────────────────────────────────────────
+
+  - id: JAVA-DES-USE
+    algorithm: DES
+    pattern: "Cipher\\.getInstance\\(\\s*\"DES[/\"]"
+    message: "DES cipher usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: JAVA-3DES-USE
+    algorithm: 3DES
+    pattern: "Cipher\\.getInstance\\(\\s*\"DESede|Cipher\\.getInstance\\(\\s*\"TripleDES"
+    message: "3DES cipher usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: JAVA-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "Cipher\\.getInstance\\(\\s*\"Blowfish"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  - id: JAVA-RC4-USE
+    algorithm: RC4
+    pattern: "Cipher\\.getInstance\\(\\s*\"RC4\"|Cipher\\.getInstance\\(\\s*\"ARCFOUR\""
+    message: "RC4 cipher usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # ── Hashes ──────────────────────────────────────────────────────────────
+
+  - id: JAVA-MD5-USE
+    algorithm: MD5
+    pattern: "MessageDigest\\.getInstance\\(\\s*\"MD5\""
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  - id: JAVA-SHA1-USE
+    algorithm: SHA-1
+    pattern: "MessageDigest\\.getInstance\\(\\s*\"SHA-?1\""
+    message: "SHA-1 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # ── ECB mode ────────────────────────────────────────────────────────────
+
+  - id: JAVA-ECB-MODE
+    algorithm: AES-128
+    pattern: "Cipher\\.getInstance\\(\\s*\"AES/ECB|Cipher\\.getInstance\\(\\s*\"DESede/ECB|/ECB/PKCS5Padding"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # ── Signature ───────────────────────────────────────────────────────────
+
+  - id: JAVA-SIGNATURE-RSA
+    algorithm: RSA-generic
+    pattern: "Signature\\.getInstance\\(\\s*\"SHA\\d*withRSA\"|Signature\\.getInstance\\(\\s*\"MD5withRSA\""
+    message: "RSA signature detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  - id: JAVA-SIGNATURE-ECDSA
+    algorithm: ECDSA-generic
+    pattern: "Signature\\.getInstance\\(\\s*\"SHA\\d*withECDSA\""
+    message: "ECDSA signature detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  # ── SSL/TLS ─────────────────────────────────────────────────────────────
+
+  - id: JAVA-SSL-CONTEXT
+    algorithm: RSA-generic
+    pattern: "SSLContext\\.getInstance\\(\\s*\"TLSv1\\.?[012]?\"|SSLContext\\.getInstance\\(\\s*\"SSL\""
+    message: "Legacy TLS/SSL protocol detected — may use quantum-vulnerable key exchange"
+    recommendation: "Use TLS 1.3 with post-quantum key exchange (e.g., ML-KEM hybrid)"
+    severity_override: medium
+
+  # ── Bouncy Castle ───────────────────────────────────────────────────────
+
+  - id: JAVA-BC-RSA
+    algorithm: RSA-generic
+    pattern: "org\\.bouncycastle\\.crypto\\.generators\\.RSAKeyPairGenerator|RSAKeyGenerationParameters"
+    message: "Bouncy Castle RSA key generation detected"
+    recommendation: "Migrate to ML-DSA or ML-KEM. Bouncy Castle already supports PQC via bc-pqc module"
+
+  - id: JAVA-BC-EC
+    algorithm: ECC-generic
+    pattern: "org\\.bouncycastle\\.crypto\\.generators\\.ECKeyPairGenerator|ECKeyGenerationParameters"
+    message: "Bouncy Castle EC key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange via bc-pqc"
+
+  # ── Weak random ─────────────────────────────────────────────────────────
+
+  - id: JAVA-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "new\\s+Random\\(|java\\.util\\.Random"
+    message: "Non-cryptographic PRNG used — insecure for key generation"
+    recommendation: "Use java.security.SecureRandom for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown

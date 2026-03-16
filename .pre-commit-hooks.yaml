@@ -1,0 +1,17 @@
+# pre-commit hook definition for quant-scan
+# Users add this to their .pre-commit-config.yaml:
+#
+# repos:
+#   - repo: https://github.com/eyd-company/quant-scan
+#     rev: v0.2.0
+#     hooks:
+#       - id: quant-scan
+
+- id: quant-scan
+  name: quant-scan PQC check
+  entry: quant-scan scan
+  language: python
+  types_or: [python, java, javascript, c, c++, csharp, go, rust, swift, kotlin, php, ruby, scala, dart]
+  args: ["--severity", "high", "--format", "console"]
+  pass_filenames: false
+  always_run: true

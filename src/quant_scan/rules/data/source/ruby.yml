@@ -1,0 +1,174 @@
+# Detection rules for Ruby source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: RB-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "OpenSSL::PKey::RSA\\.new|OpenSSL::PKey::RSA\\.generate"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: RB-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "require\\s+['\"]openssl['\"].*RSA|OpenSSL::PKey::RSA"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: RB-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "RSA\\.new\\(1024\\)|RSA\\.generate\\(1024\\)"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: RB-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "RSA\\.new\\(2048\\)|RSA\\.generate\\(2048\\)"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA ----------------------------------------------------------
+
+  - id: RB-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "OpenSSL::PKey::EC\\.new|OpenSSL::PKey::EC\\.generate"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: RB-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "OpenSSL::PKey::EC.*sign|ECDSA"
+    message: "ECDSA usage detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DSA / DH -------------------------------------------------------------
+
+  - id: RB-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "OpenSSL::PKey::DSA\\.new|OpenSSL::PKey::DSA\\.generate"
+    message: "DSA key generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: RB-DH-GENERATE
+    algorithm: DH-generic
+    pattern: "OpenSSL::PKey::DH\\.new|OpenSSL::PKey::DH\\.generate"
+    message: "Diffie-Hellman key generation detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: RB-DES-USE
+    algorithm: DES
+    pattern: "OpenSSL::Cipher::DES|OpenSSL::Cipher\\.new\\(['\"]DES"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: RB-3DES-USE
+    algorithm: 3DES
+    pattern: "OpenSSL::Cipher\\.new\\(['\"]DES-EDE3|Cipher\\.new\\(.*3DES"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: RB-MD5-USE
+    algorithm: MD5
+    pattern: "Digest::MD5|OpenSSL::Digest::MD5|md5\\("
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: RB-SHA1-USE
+    algorithm: SHA-1
+    pattern: "Digest::SHA1|OpenSSL::Digest::SHA1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: RB-RC4-USE
+    algorithm: RC4
+    pattern: "OpenSSL::Cipher::RC4|Cipher\\.new\\(['\"]RC4"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: RB-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "OpenSSL::Cipher::BF|Cipher\\.new\\(['\"]BF"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: RB-ECB-MODE
+    algorithm: AES-128
+    pattern: "Cipher\\.new\\(.*ECB|\\.encrypt.*ECB"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: RB-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "rand\\(|Random\\.new\\.rand|srand\\("
+    message: "Non-cryptographic PRNG usage detected"
+    recommendation: "Use SecureRandom for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- bcrypt ---------------------------------------------------------------
+
+  - id: RB-BCRYPT-USE
+    algorithm: RSA-generic
+    pattern: "BCrypt::Password\\.create|require\\s+['\"]bcrypt"
+    message: "bcrypt usage detected for password hashing"
+    recommendation: "bcrypt is quantum-resistant for password hashing; ensure adequate cost factor"
+
+  # -- SSL/TLS --------------------------------------------------------------
+
+  - id: RB-SSL-WEAK
+    algorithm: RSA-generic
+    pattern: "SSLContext\\.new.*SSLv3|SSLContext\\.new.*TLSv1\\b"
+    message: "Weak TLS/SSL protocol version detected"
+    recommendation: "Use TLS 1.3 and plan for post-quantum TLS"
+    severity_override: high
+
+  # -- Certificate verification ---------------------------------------------
+
+  - id: RB-CERT-VERIFY
+    algorithm: RSA-generic
+    pattern: "verify_mode\\s*=\\s*OpenSSL::SSL::VERIFY_NONE"
+    message: "Certificate verification disabled — MITM vulnerability"
+    recommendation: "Always verify TLS certificates in production"
+    severity_override: high
+
+  # -- RbNaCl ---------------------------------------------------------------
+
+  - id: RB-RBNACL-USE
+    algorithm: AES-128
+    pattern: "RbNaCl::SecretBox|require\\s+['\"]rbnacl"
+    message: "RbNaCl usage detected — generally quantum safe for symmetric operations"
+    recommendation: "RbNaCl symmetric primitives are quantum-resistant; review key exchange for PQC readiness"
+    quantum_risk_override: safe
+    severity_override: info
+
+  # -- AES-128 --------------------------------------------------------------
+
+  - id: RB-AES128-USE
+    algorithm: AES-128
+    pattern: "Cipher\\.new\\(.*AES-128|aes-128"
+    message: "AES-128 usage detected — reduced quantum security margin"
+    recommendation: "Use AES-256 for full quantum resistance (Grover's algorithm halves effective key length)"
+
+  # -- HMAC MD5 -------------------------------------------------------------
+
+  - id: RB-HMAC-MD5
+    algorithm: MD5
+    pattern: "HMAC\\.new.*md5|OpenSSL::HMAC.*MD5"
+    message: "HMAC-MD5 usage detected"
+    recommendation: "Replace with HMAC-SHA256 or HMAC-SHA3"

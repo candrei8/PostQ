@@ -1,0 +1,102 @@
+# Cadenas en espanol para informes de quant-scan.
+
+report:
+  title: "Evaluacion de Vulnerabilidades Criptograficas Post-Cuanticas"
+  subtitle: "Informe Automatizado de Preparacion PQC"
+  generated_by: "Generado por quant-scan"
+  confidential: "CONFIDENCIAL"
+  date_label: "Fecha del Informe"
+  prepared_for: "Preparado para"
+  prepared_by: "Preparado por"
+
+executive_summary:
+  title: "Resumen Ejecutivo"
+  overview: "Este informe presenta los resultados de una evaluacion automatizada de vulnerabilidades criptograficas post-cuanticas (PQC) realizada sobre el codigo fuente e infraestructura objetivo."
+  score_label: "Puntuacion de Seguridad"
+  grade_label: "Calificacion"
+  pqc_readiness: "Preparacion PQC"
+  total_findings: "Hallazgos Totales"
+  files_scanned: "Archivos Escaneados"
+  scan_duration: "Duracion del Escaneo"
+  risk_level: "Nivel de Riesgo"
+  critical_risk: "Critico — Accion inmediata requerida"
+  high_risk: "Alto — Accion requerida en los proximos 6 meses"
+  medium_risk: "Medio — Planificar migracion en 12 meses"
+  low_risk: "Bajo — Monitorizar y planificar"
+
+findings:
+  title: "Hallazgos Detallados"
+  severity: "Severidad"
+  algorithm: "Algoritmo"
+  quantum_risk: "Riesgo Cuantico"
+  location: "Ubicacion"
+  message: "Descripcion"
+  recommendation: "Recomendacion"
+  no_findings: "No se detectaron hallazgos"
+  confidence: "Confianza"
+
+severity_labels:
+  critical: "Critico"
+  high: "Alto"
+  medium: "Medio"
+  low: "Bajo"
+  info: "Informativo"
+
+quantum_risk_labels:
+  vulnerable: "Vulnerable Cuanticamente"
+  weakened: "Debilitado Cuanticamente"
+  safe: "Seguro Cuanticamente"
+  unknown: "Desconocido"
+
+compliance:
+  title: "Evaluacion de Cumplimiento"
+  framework: "Marco Normativo"
+  requirement: "Requisito"
+  status: "Estado"
+  deadline: "Plazo"
+  gap_analysis: "Analisis de Brechas de Cumplimiento"
+  compliance_pct: "Porcentaje de Cumplimiento"
+  non_compliant: "No Conforme"
+  action_required: "Accion Requerida"
+  compliant: "Conforme"
+  critical_gaps: "Brechas Criticas"
+
+migration:
+  title: "Hoja de Ruta de Migracion PQC"
+  phase: "Fase"
+  task: "Tarea"
+  from_algo: "Algoritmo Actual"
+  to_algo: "Algoritmo Objetivo"
+  priority: "Prioridad"
+  effort: "Esfuerzo Estimado"
+  cost: "Coste Estimado"
+  complexity: "Complejidad"
+  vendor: "Proveedor Recomendado"
+  timeline: "Cronograma"
+  total_hours: "Horas Totales"
+  total_cost: "Coste Total"
+
+quantum_timeline:
+  title: "Linea Temporal de Riesgo Cuantico"
+  algorithm: "Algoritmo"
+  break_year_optimistic: "Ano de Ruptura (Optimista)"
+  break_year_moderate: "Ano de Ruptura (Moderado)"
+  break_year_conservative: "Ano de Ruptura (Conservador)"
+  qubits_required: "Qubits Logicos Requeridos"
+  hndl_risk: "Riesgo HNDL"
+  urgency: "Urgencia"
+  immediate: "INMEDIATO — Los datos ya estan en riesgo"
+  urgent: "URGENTE — Migrar ahora"
+  planned: "PLANIFICADO — Iniciar migracion"
+  monitor: "MONITORIZAR — Seguir el progreso"
+
+appendix:
+  title: "Apendice — Hallazgos Completos"
+  methodology: "Metodologia"
+  methodology_text: "Esta evaluacion se realizo utilizando quant-scan, un escaner automatizado de vulnerabilidades criptograficas post-cuanticas. La herramienta analiza codigo fuente, certificados, configuraciones, dependencias e infraestructura en busca de algoritmos criptograficos vulnerables a la computacion cuantica."
+  limitations: "Limitaciones"
+  limitations_text: "Esta evaluacion automatizada identifica posibles vulnerabilidades criptograficas mediante analisis estatico. Pueden producirse falsos positivos. Se recomienda una revision manual para los hallazgos criticos."
+  glossary: "Glosario"
+  pqc_def: "Criptografia Post-Cuantica — Algoritmos criptograficos disenados para resistir ataques de computadoras cuanticas"
+  hndl_def: "Harvest Now, Decrypt Later — Ataque donde los datos cifrados se capturan ahora para descifrarlos cuando las computadoras cuanticas esten disponibles"
+  qvss_def: "Sistema de Puntuacion de Vulnerabilidades Cuanticas — Marco de puntuacion de riesgos adaptado para amenazas criptograficas cuanticas"

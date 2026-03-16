@@ -1,0 +1,25 @@
+# Bitbucket Pipelines template for quant-scan PQC assessment
+
+image: python:3.12-slim
+
+pipelines:
+  default:
+    - step:
+        name: PQC Assessment
+        script:
+          - pip install quant-scan
+          - quant-scan scan . --format json --output quant-scan-report.json --severity info || true
+          - quant-scan scan . --format html --output quant-scan-report.html || true
+        artifacts:
+          - quant-scan-report.json
+          - quant-scan-report.html
+
+  pull-requests:
+    "**":
+      - step:
+          name: PQC Security Check
+          script:
+            - pip install quant-scan
+            - quant-scan scan . --format json --output report.json --quality-gate --min-score 70 --max-critical 0
+          artifacts:
+            - report.json

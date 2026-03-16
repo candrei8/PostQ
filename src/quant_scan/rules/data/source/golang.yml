@@ -1,0 +1,135 @@
+# Detection rules for Go source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── RSA ───────────────────────────────────────────────────────────────
+
+  - id: GO-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "\"crypto/rsa\""
+    message: "crypto/rsa import detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: GO-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "rsa\\.GenerateKey\\("
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: GO-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "rsa\\.GenerateKey\\([^,]+,\\s*1024\\)"
+    message: "RSA 1024-bit key generation — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: GO-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "rsa\\.GenerateKey\\([^,]+,\\s*2048\\)"
+    message: "RSA 2048-bit key generation — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # ── DSA ──────────────────────────────────────────────────────────────
+
+  - id: GO-DSA-IMPORT
+    algorithm: DSA-generic
+    pattern: "\"crypto/dsa\""
+    message: "crypto/dsa import detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204). DSA is deprecated in Go's standard library"
+
+  - id: GO-DSA-GENERATE
+    algorithm: DSA-generic
+    pattern: "dsa\\.GenerateParameters|dsa\\.GenerateKey"
+    message: "DSA key generation detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  # ── ECDSA / Elliptic ────────────────────────────────────────────────────
+
+  - id: GO-ECDSA-IMPORT
+    algorithm: ECDSA-generic
+    pattern: "\"crypto/ecdsa\""
+    message: "crypto/ecdsa import detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  - id: GO-ECDSA-GENERATE
+    algorithm: ECDSA-generic
+    pattern: "ecdsa\\.GenerateKey\\("
+    message: "ECDSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures"
+
+  - id: GO-ELLIPTIC-IMPORT
+    algorithm: ECC-generic
+    pattern: "\"crypto/elliptic\""
+    message: "crypto/elliptic import detected — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  # ── Symmetric ciphers ───────────────────────────────────────────────────
+
+  - id: GO-DES-IMPORT
+    algorithm: DES
+    pattern: "\"crypto/des\""
+    message: "crypto/des import detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM (crypto/aes + crypto/cipher)"
+
+  - id: GO-DES-USE
+    algorithm: DES
+    pattern: "des\\.NewCipher|des\\.NewTripleDESCipher"
+    message: "DES/3DES cipher instantiation detected"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: GO-RC4-IMPORT
+    algorithm: RC4
+    pattern: "\"crypto/rc4\""
+    message: "crypto/rc4 import detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # ── Hashes ──────────────────────────────────────────────────────────────
+
+  - id: GO-MD5-IMPORT
+    algorithm: MD5
+    pattern: "\"crypto/md5\""
+    message: "crypto/md5 import detected — broken hash"
+    recommendation: "Replace with crypto/sha256 or SHA-3. Never use MD5 for security purposes"
+
+  - id: GO-MD5-USE
+    algorithm: MD5
+    pattern: "md5\\.New\\(|md5\\.Sum\\("
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with sha256.New() or SHA-3"
+
+  - id: GO-SHA1-IMPORT
+    algorithm: SHA-1
+    pattern: "\"crypto/sha1\""
+    message: "crypto/sha1 import detected — broken hash"
+    recommendation: "Replace with crypto/sha256 or SHA-3-256"
+
+  - id: GO-SHA1-USE
+    algorithm: SHA-1
+    pattern: "sha1\\.New\\(|sha1\\.Sum\\("
+    message: "SHA-1 hash usage detected — broken"
+    recommendation: "Replace with sha256.New() or SHA-3-256"
+
+  # ── x/crypto patterns ──────────────────────────────────────────────────
+
+  - id: GO-XCRYPTO-BLOWFISH
+    algorithm: Blowfish
+    pattern: "\"golang\\.org/x/crypto/blowfish\"|blowfish\\.NewCipher"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  - id: GO-XCRYPTO-CAST5
+    algorithm: Blowfish
+    pattern: "\"golang\\.org/x/crypto/cast5\"|cast5\\.NewCipher"
+    message: "CAST5 usage detected — legacy cipher, deprecated"
+    recommendation: "Replace with AES-256-GCM"
+    severity_override: medium
+
+  # ── Weak random ─────────────────────────────────────────────────────────
+
+  - id: GO-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "\"math/rand\"|math/rand\"|rand\\.Intn|rand\\.Int\\(|rand\\.Read\\("
+    message: "math/rand is not cryptographically secure"
+    recommendation: "Use crypto/rand for cryptographic randomness (e.g., rand.Read from crypto/rand)"
+    severity_override: medium
+    quantum_risk_override: unknown

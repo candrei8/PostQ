@@ -1,0 +1,73 @@
+name: "Quant-Scan PQC Assessment"
+description: "Scan code for post-quantum cryptographic vulnerabilities"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  target:
+    description: "Directory or file to scan"
+    required: false
+    default: "."
+  format:
+    description: "Output format: console, json, html, sarif, cbom"
+    required: false
+    default: "sarif"
+  severity:
+    description: "Minimum severity: critical, high, medium, low, info"
+    required: false
+    default: "info"
+  quality-gate:
+    description: "Enable quality gate"
+    required: false
+    default: "false"
+  min-score:
+    description: "Quality gate minimum score"
+    required: false
+    default: "70"
+  max-critical:
+    description: "Quality gate max critical findings"
+    required: false
+    default: "0"
+  upload-sarif:
+    description: "Upload SARIF to GitHub Security tab"
+    required: false
+    default: "true"
+
+outputs:
+  score:
+    description: "Security score (0-100)"
+  grade:
+    description: "Security grade (A-F)"
+  findings:
+    description: "Total number of findings"
+  sarif-file:
+    description: "Path to SARIF output file"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install quant-scan
+      shell: bash
+      run: pip install quant-scan
+
+    - name: Run scan
+      shell: bash
+      run: |
+        quant-scan scan ${{ inputs.target }} \
+          --format ${{ inputs.format }} \
+          --severity ${{ inputs.severity }} \
+          --output results.${{ inputs.format }} \
+          ${{ inputs.quality-gate == 'true' && format('--quality-gate --min-score {0} --max-critical {1}', inputs.min-score, inputs.max-critical) || '' }} \
+          || true
+
+    - name: Upload SARIF
+      if: inputs.upload-sarif == 'true' && inputs.format == 'sarif'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: results.sarif

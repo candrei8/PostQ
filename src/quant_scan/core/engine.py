@@ -1,11 +1,27 @@
 """Scan engine — orchestrates scanners, aggregates results."""
-
 from __future__ import annotations
 
 import time
 
 from quant_scan.core.context import ScanContext
 from quant_scan.core.enums import QuantumRisk, Severity
+from quant_scan.core.event_bus import EventBus
+from quant_scan.core.events import (
+    FindingDetected,
+    ScanCompleted,
+    ScanError,
+    ScannerCompleted,
+    ScannerStarted,
+    ScanStarted,
+)
+from quant_scan.core.middleware import (
+    ComplianceEnrichmentMiddleware,
+    ContextAnalysisMiddleware,
+    DeduplicationMiddleware,
+    Middleware,
+    SeverityFilterMiddleware,
+    SortingMiddleware,
+)
 from quant_scan.core.models import Finding, ScanResult, ScanSummary
 from quant_scan.scanners.base import BaseScanner
 from quant_scan.scanners.registry import get_all_scanners, get_scanner
@@ -13,9 +29,52 @@ from quant_scan.scanners.registry import get_all_scanners, get_scanner
 # Import scanner modules so their @register decorators execute
 import quant_scan.scanners.source.scanner  # noqa: F401
 
+# Try importing optional scanner modules
+for _mod in (
+    "quant_scan.scanners.certificate.scanner",
+    "quant_scan.scanners.config.scanner",
+    "quant_scan.scanners.dependency.scanner",
+    "quant_scan.scanners.secrets.scanner",
+    "quant_scan.scanners.network.scanner",
+    "quant_scan.scanners.binary.scanner",
+    "quant_scan.scanners.iac.scanner",
+    "quant_scan.scanners.cloud.scanner",
+    "quant_scan.scanners.container.scanner",
+):
+    try:
+        __import__(_mod)
+    except ImportError:
+        pass
+
+
+def default_middleware() -> list[Middleware]:
+    """Return the standard middleware chain."""
+    return [
+        ContextAnalysisMiddleware(),
+        ComplianceEnrichmentMiddleware(),
+        DeduplicationMiddleware(),
+        SeverityFilterMiddleware(),
+        SortingMiddleware(),
+    ]
+
 
 class ScanEngine:
     """Orchestrates scanners and builds a ScanResult."""
+
+    def __init__(
+        self,
+        *,
+        scanners: list[BaseScanner] | None = None,
+        event_bus: EventBus | None = None,
+        middleware: list[Middleware] | None = None,
+    ) -> None:
+        self._scanners = scanners
+        self._event_bus = event_bus or EventBus()
+        self._middleware = middleware if middleware is not None else default_middleware()
+
+    @property
+    def event_bus(self) -> EventBus:
+        return self._event_bus
 
     def run(
         self,
@@ -26,41 +85,61 @@ class ScanEngine:
         start = time.monotonic()
 
         # Pick scanners
-        if scanner_names:
-            scanners: list[BaseScanner] = [
-                get_scanner(n) for n in scanner_names
-            ]
+        if self._scanners:
+            scanners = self._scanners
+        elif scanner_names:
+            scanners = [get_scanner(n) for n in scanner_names]
         else:
             scanners = get_all_scanners()
+
+        self._event_bus.emit(ScanStarted(
+            targets=[str(t) for t in context.targets],
+            scanner_names=[s.name for s in scanners],
+        ))
 
         # Run scanners
         all_findings: list[Finding] = []
         for scanner in scanners:
-            findings = scanner.scan(context)
-            all_findings.extend(findings)
+            scanner_start = time.monotonic()
+            self._event_bus.emit(ScannerStarted(scanner_name=scanner.name))
 
-        # Filter by severity
-        all_findings = self._filter_severity(all_findings, context.min_severity)
+            try:
+                findings = scanner.scan(context)
+                for f in findings:
+                    self._event_bus.emit(FindingDetected(finding=f))
+                all_findings.extend(findings)
+                scanner_finding_count = len(findings)
+            except Exception as exc:
+                self._event_bus.emit(ScanError(
+                    error=str(exc),
+                    scanner_name=scanner.name,
+                ))
+                scanner_finding_count = 0
+
+            scanner_elapsed = time.monotonic() - scanner_start
+            self._event_bus.emit(ScannerCompleted(
+                scanner_name=scanner.name,
+                finding_count=scanner_finding_count,
+                duration_seconds=round(scanner_elapsed, 3),
+            ))
+
+        # Apply middleware chain
+        for mw in self._middleware:
+            all_findings = mw.process(all_findings, context)
 
         # Build summary
         summary = self._build_summary(all_findings)
 
         elapsed = time.monotonic() - start
-        return ScanResult(
+        result = ScanResult(
             findings=all_findings,
             summary=summary,
             targets=[str(t) for t in context.targets],
             duration_seconds=round(elapsed, 2),
         )
 
-    @staticmethod
-    def _filter_severity(
-        findings: list[Finding], min_severity: Severity
-    ) -> list[Finding]:
-        order = [Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW, Severity.INFO]
-        min_idx = order.index(min_severity)
-        allowed = set(order[: min_idx + 1])
-        return [f for f in findings if f.severity in allowed]
+        self._event_bus.emit(ScanCompleted(result=result))
+        return result
 
     @staticmethod
     def _build_summary(findings: list[Finding]) -> ScanSummary:

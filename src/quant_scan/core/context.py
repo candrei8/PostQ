@@ -19,3 +19,4 @@ class ScanContext:
     output_file: str | None = None
     languages: list[str] = field(default_factory=list)
     no_color: bool = False
+    network_targets: list[str] = field(default_factory=list)

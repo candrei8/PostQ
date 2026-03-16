@@ -1,0 +1,154 @@
+# Detection rules for Dart source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # -- RSA ------------------------------------------------------------------
+
+  - id: DT-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "RSAKeyGenerator|AsymmetricKeyPair.*RSA|generateRSAKeyPair"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: DT-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "import\\s+['\"]package:pointycastle|import.*RSA"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: DT-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "bitLength.*1024|keySize.*1024"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: DT-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "bitLength.*2048|keySize.*2048"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # -- ECC / ECDSA ----------------------------------------------------------
+
+  - id: DT-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "ECKeyGenerator|ECCurve_|ECDomainParameters"
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: DT-ECDSA-USE
+    algorithm: ECDSA-generic
+    pattern: "ECDSASigner|Signer.*ECDSA"
+    message: "ECDSA usage detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # -- DSA / DH -------------------------------------------------------------
+
+  - id: DT-DSA-USE
+    algorithm: DSA-generic
+    pattern: "DSASigner|DSAPublicKey|DSAPrivateKey"
+    message: "DSA usage detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: DT-DH-USE
+    algorithm: DH-generic
+    pattern: "DHKeyGenerator|DHParameters"
+    message: "Diffie-Hellman usage detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # -- DES / 3DES -----------------------------------------------------------
+
+  - id: DT-DES-USE
+    algorithm: DES
+    pattern: "DESEngine|DESedeEngine|DesEcb|BlockCipher.*DES"
+    message: "DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: DT-3DES-USE
+    algorithm: 3DES
+    pattern: "DESedeEngine|TripleDESEngine"
+    message: "3DES usage detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # -- MD5 ------------------------------------------------------------------
+
+  - id: DT-MD5-USE
+    algorithm: MD5
+    pattern: "md5\\.convert|import.*package:crypto.*md5|MD5Digest|Digest.*md5"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # -- SHA-1 ----------------------------------------------------------------
+
+  - id: DT-SHA1-USE
+    algorithm: SHA-1
+    pattern: "sha1\\.convert|import.*package:crypto.*sha1|SHA1Digest|Digest.*sha1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # -- RC4 ------------------------------------------------------------------
+
+  - id: DT-RC4-USE
+    algorithm: RC4
+    pattern: "RC4Engine|ARC4"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # -- Blowfish -------------------------------------------------------------
+
+  - id: DT-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "BlowfishEngine"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # -- ECB mode -------------------------------------------------------------
+
+  - id: DT-ECB-MODE
+    algorithm: AES-128
+    pattern: "ECBBlockCipher|BlockCipher.*ECB"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # -- Weak random ----------------------------------------------------------
+
+  - id: DT-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "\\bRandom\\(\\)(?!.*secure)"
+    message: "Non-cryptographic PRNG usage detected"
+    recommendation: "Use Random.secure() for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown
+
+  # -- encrypt package ------------------------------------------------------
+
+  - id: DT-ENCRYPT-PKG
+    algorithm: RSA-generic
+    pattern: "import\\s+['\"]package:encrypt|Encrypter\\("
+    message: "encrypt package usage detected — audit for weak algorithms"
+    recommendation: "Verify encrypt package configuration uses AES-256 and post-quantum key exchange"
+
+  # -- pointycastle ---------------------------------------------------------
+
+  - id: DT-POINTYCASTLE
+    algorithm: RSA-generic
+    pattern: "import\\s+['\"]package:pointycastle"
+    message: "pointycastle package import detected — audit for weak algorithms"
+    recommendation: "Audit pointycastle usage for deprecated algorithms; plan PQC migration"
+
+  # -- SSL context ----------------------------------------------------------
+
+  - id: DT-SSL-CONTEXT
+    algorithm: RSA-generic
+    pattern: "SecurityContext\\(\\)|SecurityContext\\.defaultContext"
+    message: "SecurityContext usage detected — audit TLS configuration"
+    recommendation: "Use TLS 1.3 and plan for post-quantum TLS"
+
+  # -- AES-128 --------------------------------------------------------------
+
+  - id: DT-AES128
+    algorithm: AES-128
+    pattern: "AESFastEngine.*128|keyLength.*128"
+    message: "AES-128 usage detected — reduced quantum security margin"
+    recommendation: "Use AES-256 for full quantum resistance (Grover's algorithm halves effective key length)"
