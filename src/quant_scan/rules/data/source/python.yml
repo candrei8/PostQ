@@ -1,0 +1,134 @@
+# Detection rules for Python source code.
+# Each rule produces a Finding when its pattern matches.
+
+rules:
+
+  # ── RSA ───────────────────────────────────────────────────────────────
+
+  - id: PY-RSA-GENERATE
+    algorithm: RSA-generic
+    pattern: "rsa\\.generate_private_key|RSA\\.generate|generate_private_key\\(.*rsa"
+    message: "RSA key generation detected"
+    recommendation: "Migrate to ML-DSA (FIPS 204) for digital signatures or ML-KEM (FIPS 203) for key encapsulation"
+
+  - id: PY-RSA-IMPORT
+    algorithm: RSA-generic
+    pattern: "from\\s+cryptography\\.hazmat\\.primitives\\.asymmetric\\s+import\\s+rsa|from\\s+Crypto\\.PublicKey\\s+import\\s+RSA|from\\s+Cryptodome\\.PublicKey\\s+import\\s+RSA"
+    message: "RSA library import detected"
+    recommendation: "Plan migration to post-quantum algorithms (ML-DSA, ML-KEM)"
+
+  - id: PY-RSA-KEYSIZE-1024
+    algorithm: RSA-1024
+    pattern: "key_size\\s*=\\s*1024|generate\\(\\s*1024\\s*[,)]"
+    message: "RSA 1024-bit key size — critically insecure"
+    recommendation: "Immediately migrate to ML-DSA-65 or ML-DSA-87. RSA-1024 is broken classically"
+
+  - id: PY-RSA-KEYSIZE-2048
+    algorithm: RSA-2048
+    pattern: "key_size\\s*=\\s*2048|generate\\(\\s*2048\\s*[,)]"
+    message: "RSA 2048-bit key size — quantum vulnerable"
+    recommendation: "Migrate to ML-DSA-65 for equivalent security in the post-quantum era"
+
+  # ── ECC / ECDSA / ECDH ───────────────────────────────────────────────
+
+  - id: PY-ECC-GENERATE
+    algorithm: ECC-generic
+    pattern: "ec\\.generate_private_key|ECC\\.generate|generate_private_key\\(.*ec\\."
+    message: "Elliptic curve key generation detected"
+    recommendation: "Migrate to ML-DSA for signatures or ML-KEM for key exchange"
+
+  - id: PY-ECC-IMPORT
+    algorithm: ECC-generic
+    pattern: "from\\s+cryptography\\.hazmat\\.primitives\\.asymmetric\\s+import\\s+ec|from\\s+Crypto\\.PublicKey\\s+import\\s+ECC"
+    message: "ECC library import detected"
+    recommendation: "Plan migration to ML-DSA (signatures) or ML-KEM (key exchange)"
+
+  - id: PY-ECDSA-IMPORT
+    algorithm: ECDSA-generic
+    pattern: "import\\s+ecdsa|from\\s+ecdsa\\s+import"
+    message: "ECDSA library import detected"
+    recommendation: "Migrate to ML-DSA for digital signatures"
+
+  # ── DSA / DH ──────────────────────────────────────────────────────────
+
+  - id: PY-DSA-IMPORT
+    algorithm: DSA-generic
+    pattern: "from\\s+cryptography\\.hazmat\\.primitives\\.asymmetric\\s+import\\s+dsa|from\\s+Crypto\\.PublicKey\\s+import\\s+DSA"
+    message: "DSA import detected — deprecated and quantum vulnerable"
+    recommendation: "Migrate to ML-DSA (FIPS 204)"
+
+  - id: PY-DH-IMPORT
+    algorithm: DH-generic
+    pattern: "from\\s+cryptography\\.hazmat\\.primitives\\.asymmetric\\s+import\\s+dh|from\\s+Crypto\\.PublicKey\\s+import\\s+DH"
+    message: "Diffie-Hellman import detected — quantum vulnerable"
+    recommendation: "Migrate to ML-KEM (FIPS 203) for key encapsulation"
+
+  # ── DES / 3DES ────────────────────────────────────────────────────────
+
+  - id: PY-DES-USE
+    algorithm: DES
+    pattern: "DES\\.new|algorithms\\.TripleDES|algorithms\\.DES\\b|DES3\\.new|Blowfish\\.new"
+    message: "DES/3DES usage detected — broken cipher"
+    recommendation: "Replace immediately with AES-256-GCM"
+
+  - id: PY-DES-IMPORT
+    algorithm: DES
+    pattern: "from\\s+Crypto\\.Cipher\\s+import\\s+DES|from\\s+Cryptodome\\.Cipher\\s+import\\s+DES"
+    message: "DES import detected"
+    recommendation: "Replace with AES-256. DES is broken and must not be used"
+
+  - id: PY-3DES-IMPORT
+    algorithm: 3DES
+    pattern: "from\\s+Crypto\\.Cipher\\s+import\\s+DES3|from\\s+Cryptodome\\.Cipher\\s+import\\s+DES3"
+    message: "3DES import detected — deprecated"
+    recommendation: "Replace with AES-256-GCM"
+
+  # ── MD5 ───────────────────────────────────────────────────────────────
+
+  - id: PY-MD5-USE
+    algorithm: MD5
+    pattern: "hashlib\\.md5|MD5\\.new|algorithms\\.MD5|md5\\(\\)"
+    message: "MD5 hash usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3. Never use MD5 for security purposes"
+
+  # ── SHA-1 ─────────────────────────────────────────────────────────────
+
+  - id: PY-SHA1-USE
+    algorithm: SHA-1
+    pattern: "hashlib\\.sha1|SHA1\\.new|SHA\\.new|algorithms\\.SHA1|hashes\\.SHA1"
+    message: "SHA-1 usage detected — broken"
+    recommendation: "Replace with SHA-256 or SHA-3-256"
+
+  # ── RC4 ───────────────────────────────────────────────────────────────
+
+  - id: PY-RC4-USE
+    algorithm: RC4
+    pattern: "ARC4\\.new|algorithms\\.ARC4|RC4"
+    message: "RC4 usage detected — broken cipher"
+    recommendation: "Replace with AES-256-GCM or ChaCha20-Poly1305"
+
+  # ── Blowfish ──────────────────────────────────────────────────────────
+
+  - id: PY-BLOWFISH-USE
+    algorithm: Blowfish
+    pattern: "Blowfish\\.new|algorithms\\.Blowfish"
+    message: "Blowfish usage detected — 64-bit block size, deprecated"
+    recommendation: "Replace with AES-256"
+
+  # ── ECB mode ──────────────────────────────────────────────────────────
+
+  - id: PY-ECB-MODE
+    algorithm: AES-128
+    pattern: "modes\\.ECB|MODE_ECB|AES\\.new\\([^)]*,\\s*AES\\.MODE_ECB"
+    message: "ECB mode detected — insecure block cipher mode"
+    recommendation: "Use GCM or CBC mode with HMAC. ECB leaks plaintext patterns"
+
+  # ── Weak random ───────────────────────────────────────────────────────
+
+  - id: PY-WEAK-RANDOM
+    algorithm: RSA-generic
+    pattern: "random\\.random|random\\.randint|random\\.choice|random\\.seed"
+    message: "Non-cryptographic PRNG used — insecure for key generation"
+    recommendation: "Use secrets module or os.urandom() for cryptographic randomness"
+    severity_override: medium
+    quantum_risk_override: unknown

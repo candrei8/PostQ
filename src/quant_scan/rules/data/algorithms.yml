@@ -1,0 +1,223 @@
+# Master database of cryptographic algorithms and their quantum risk profile.
+# Used by all scanners to classify findings.
+
+algorithms:
+
+  # ── Asymmetric (Shor's algorithm → fully vulnerable) ──────────────────
+
+  RSA-1024:
+    family: RSA
+    key_size: 1024
+    quantum_risk: vulnerable
+    severity: critical
+    pqc_replacements: [ML-DSA-65, ML-DSA-87, SLH-DSA-SHA2-128s]
+    eu_deadline: "2026-Q4"
+    description: "RSA 1024-bit — broken classically, fully vulnerable to quantum"
+
+  RSA-2048:
+    family: RSA
+    key_size: 2048
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-65, ML-DSA-87, SLH-DSA-SHA2-128s]
+    eu_deadline: "2030"
+    description: "RSA 2048-bit — secure classically, vulnerable to quantum (Shor)"
+
+  RSA-4096:
+    family: RSA
+    key_size: 4096
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-65, ML-DSA-87, SLH-DSA-SHA2-128s]
+    eu_deadline: "2030"
+    description: "RSA 4096-bit — secure classically, vulnerable to quantum (Shor)"
+
+  RSA-generic:
+    family: RSA
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-65, ML-DSA-87]
+    eu_deadline: "2030"
+    description: "RSA (unknown key size) — vulnerable to quantum (Shor)"
+
+  ECC-P256:
+    family: ECC
+    key_size: 256
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-44, ML-DSA-65]
+    eu_deadline: "2030"
+    description: "ECC P-256 — vulnerable to quantum (Shor)"
+
+  ECC-P384:
+    family: ECC
+    key_size: 384
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-65, ML-DSA-87]
+    eu_deadline: "2030"
+    description: "ECC P-384 — vulnerable to quantum (Shor)"
+
+  ECC-generic:
+    family: ECC
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-44, ML-DSA-65]
+    eu_deadline: "2030"
+    description: "ECC (generic) — vulnerable to quantum (Shor)"
+
+  DSA-generic:
+    family: DSA
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-65, ML-DSA-87]
+    eu_deadline: "2030"
+    description: "DSA — vulnerable to quantum (Shor)"
+
+  DH-generic:
+    family: DH
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-KEM-768, ML-KEM-1024]
+    eu_deadline: "2030"
+    description: "Diffie-Hellman — vulnerable to quantum (Shor)"
+
+  ECDH-generic:
+    family: ECDH
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-KEM-512, ML-KEM-768]
+    eu_deadline: "2030"
+    description: "ECDH — vulnerable to quantum (Shor)"
+
+  ECDSA-generic:
+    family: ECDSA
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [ML-DSA-44, ML-DSA-65]
+    eu_deadline: "2030"
+    description: "ECDSA — vulnerable to quantum (Shor)"
+
+  # ── Symmetric (Grover → weakened, need 2x key size) ──────────────────
+
+  AES-128:
+    family: AES
+    key_size: 128
+    quantum_risk: weakened
+    severity: medium
+    pqc_replacements: [AES-256]
+    description: "AES-128 — Grover reduces effective security to 64-bit"
+
+  AES-256:
+    family: AES
+    key_size: 256
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "AES-256 — quantum safe (Grover reduces to 128-bit, still sufficient)"
+
+  DES:
+    family: DES
+    key_size: 56
+    quantum_risk: vulnerable
+    severity: critical
+    pqc_replacements: [AES-256]
+    description: "DES — broken classically, trivially broken by quantum"
+
+  3DES:
+    family: 3DES
+    key_size: 168
+    quantum_risk: vulnerable
+    severity: critical
+    pqc_replacements: [AES-256]
+    description: "3DES — deprecated, vulnerable to quantum"
+
+  Blowfish:
+    family: Blowfish
+    quantum_risk: weakened
+    severity: medium
+    pqc_replacements: [AES-256]
+    description: "Blowfish — 64-bit block, weakened by quantum"
+
+  RC4:
+    family: RC4
+    quantum_risk: vulnerable
+    severity: critical
+    pqc_replacements: [AES-256, ChaCha20-Poly1305]
+    description: "RC4 — broken classically, do not use"
+
+  # ── Hashes ────────────────────────────────────────────────────────────
+
+  MD5:
+    family: MD5
+    quantum_risk: vulnerable
+    severity: critical
+    pqc_replacements: [SHA-3-256, SHA-256]
+    description: "MD5 — broken, collision attacks trivial"
+
+  SHA-1:
+    family: SHA-1
+    quantum_risk: vulnerable
+    severity: high
+    pqc_replacements: [SHA-3-256, SHA-256]
+    description: "SHA-1 — broken, SHAttered attack demonstrated"
+
+  SHA-256:
+    family: SHA-2
+    key_size: 256
+    quantum_risk: weakened
+    severity: low
+    pqc_replacements: [SHA-3-256]
+    description: "SHA-256 — Grover reduces collision resistance, still acceptable"
+
+  SHA-512:
+    family: SHA-2
+    key_size: 512
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "SHA-512 — quantum safe for foreseeable future"
+
+  # ── Post-Quantum (safe) ──────────────────────────────────────────────
+
+  ML-KEM-512:
+    family: ML-KEM
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-KEM-512 (FIPS 203) — post-quantum KEM, NIST Level 1"
+
+  ML-KEM-768:
+    family: ML-KEM
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-KEM-768 (FIPS 203) — post-quantum KEM, NIST Level 3"
+
+  ML-KEM-1024:
+    family: ML-KEM
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-KEM-1024 (FIPS 203) — post-quantum KEM, NIST Level 5"
+
+  ML-DSA-44:
+    family: ML-DSA
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-DSA-44 (FIPS 204) — post-quantum signature, NIST Level 2"
+
+  ML-DSA-65:
+    family: ML-DSA
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-DSA-65 (FIPS 204) — post-quantum signature, NIST Level 3"
+
+  ML-DSA-87:
+    family: ML-DSA
+    quantum_risk: safe
+    severity: info
+    pqc_replacements: []
+    description: "ML-DSA-87 (FIPS 204) — post-quantum signature, NIST Level 5"
