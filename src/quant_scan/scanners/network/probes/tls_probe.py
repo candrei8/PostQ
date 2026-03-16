@@ -104,8 +104,7 @@ def probe_tls(host: str, port: int = 443) -> list[Finding]:
                                     location=_make_location(host, port, f"Cipher: {cipher_name}"),
                                     message=f"Weak cipher suite negotiated: {cipher_name}",
                                     recommendation=(
-                                        "Configure server to use strong cipher "
-                                        "suites (AES-256-GCM, ChaCha20-Poly1305)"
+                                        "Configure server to use strong cipher suites (AES-256-GCM, ChaCha20-Poly1305)"
                                     ),
                                 )
                             )

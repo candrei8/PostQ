@@ -34,8 +34,7 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
                 framework="CNSS",
                 requirement_id="CNSSP-15 Sec 7",
                 description=(
-                    "Quantum-vulnerable asymmetric algorithm in "
-                    "national security system requires PQC transition"
+                    "Quantum-vulnerable asymmetric algorithm in national security system requires PQC transition"
                 ),
                 status="action_required",
                 deadline="2030-12-31",

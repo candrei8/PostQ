@@ -258,8 +258,7 @@ class SecretScanner(BaseScanner):
                                 ),
                                 message=f"Weak cryptographic practice detected: {issue_type.replace('-', ' ').lower()}",
                                 recommendation=(
-                                    "Use cryptographically secure random "
-                                    "number generators and proper key management"
+                                    "Use cryptographically secure random number generators and proper key management"
                                 ),
                                 scanner_type=self.name,
                             )

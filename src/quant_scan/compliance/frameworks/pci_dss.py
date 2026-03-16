@@ -48,8 +48,7 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
                 framework="PCI DSS v4.0",
                 requirement_id="Req 4.2.1",
                 description=(
-                    f"Strong cryptography for data-in-transit — "
-                    f"{family.value} is not considered strong cryptography"
+                    f"Strong cryptography for data-in-transit — {family.value} is not considered strong cryptography"
                 ),
                 status="non_compliant",
             )

@@ -26,8 +26,7 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
                 framework="HIPAA",
                 requirement_id="164.312(a)(2)(iv)",
                 description=(
-                    f"Encryption and decryption — {family.value} "
-                    "does not meet encryption standard requirements"
+                    f"Encryption and decryption — {family.value} does not meet encryption standard requirements"
                 ),
                 status="non_compliant",
             )

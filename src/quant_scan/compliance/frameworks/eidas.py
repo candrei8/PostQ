@@ -33,8 +33,7 @@ def map_finding(finding: Finding) -> list[ComplianceRef]:
                 framework="eIDAS 2.0",
                 requirement_id="Art 32",
                 description=(
-                    "Qualified electronic signatures using "
-                    "quantum-vulnerable algorithms require migration plan"
+                    "Qualified electronic signatures using quantum-vulnerable algorithms require migration plan"
                 ),
                 status="action_required",
                 deadline="2027-12-31",
